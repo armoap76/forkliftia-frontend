@@ -20,7 +20,7 @@ type Case = {
   status?: string; 
 };
 
-const API_BASE_URL = "https://flk-backend.onrender.com"; // URL del backend directamente
+const API_BASE_URL = "https://flk-backend.onrender.com";
 
 function App() {
   const [brand, setBrand] = useState("");
@@ -70,7 +70,7 @@ function App() {
   }
 
   // Traer lista de casos desde /cases
-  async function handleLoadCases() {
+  const handleLoadCases = async () => {
     setCasesError(null);
 
     try {
@@ -85,7 +85,7 @@ function App() {
       console.error(err);
       setCasesError("No se pudieron cargar los casos guardados.");
     }
-  }
+  };
 
   return (
     <div className="app-root">
@@ -190,6 +190,7 @@ function App() {
         <button
           type="button"
           onClick={handleLoadCases}
+          className="app-button"
           style={{ marginTop: "1rem" }}
         >
           Cargar casos guardados
