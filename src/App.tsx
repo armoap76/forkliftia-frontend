@@ -18,7 +18,6 @@ type Case = {
   checks_done?: string | null;
   diagnosis: string;
   status?: string; 
-
 };
 
 const API_BASE_URL = "https://flk-backend.onrender.com"; // URL del backend directamente
@@ -88,129 +87,134 @@ function App() {
     }
   }
 
-  
-return (
-  <div className="app-root">
-    <div className="app-card">
-      <h1 className="app-title">ForkliftIA</h1>
-      <p className="app-subtitle">
-        Diagnóstico inicial para autoelevadores (React + Vite)
-      </p>
+  return (
+    <div className="app-root">
+      <div className="app-card">
+        <h1 className="app-title">ForkliftIA</h1>
+        <p className="app-subtitle">
+          Diagnóstico inicial para autoelevadores (React + Vite)
+        </p>
 
-      <form onSubmit={handleSubmit} className="app-form">
-        <div>
-          <div className="app-label">Marca</div>
-          <input
-            className="app-input"
-            placeholder="Linde, Clark, BT..."
-            value={brand}
-            onChange={(e) => setBrand(e.target.value)}
-          />
-        </div>
-
-        <div>
-          <div className="app-label">Modelo</div>
-          <input
-            className="app-input"
-            placeholder="E20, TM15..."
-            value={model}
-            onChange={(e) => setModel(e.target.value)}
-          />
-        </div>
-
-        <div>
-          <div className="app-label">Serie (opcional)</div>
-          <input
-            className="app-input"
-            placeholder="335, 336, 1275..."
-            value={series}
-            onChange={(e) => setSeries(e.target.value)}
-          />
-        </div>
-
-        <div>
-          <div className="app-label">Código de error (opcional)</div>
-          <input
-            className="app-input"
-            placeholder="E225, 07, A1-34..."
-            value={errorCode}
-            onChange={(e) => setErrorCode(e.target.value)}
-          />
-        </div>
-
-        <div>
-          <div className="app-label">Síntoma</div>
-          <textarea
-            className="app-textarea"
-            placeholder="No levanta carga, se corta al mover, etc."
-            value={symptom}
-            onChange={(e) => setSymptom(e.target.value)}
-          />
-        </div>
-
-        <div>
-          <div className="app-label">Checks realizados</div>
-          <textarea
-            className="app-textarea"
-            placeholder="Batería OK, motor OK, cables revisados..."
-            value={checksDone}
-            onChange={(e) => setChecksDone(e.target.value)}
-          />
-        </div>
-
-        <button type="submit" className="app-button">
-          Obtener diagnóstico
-        </button>
-      </form>
-
-      {/* Errores */}
-      {error && <p className="app-error">⚠️ Error: {error}</p>}
-
-      {/* Diagnóstico */}
-      {result && (
-        <section className="app-section">
-          <h2>Diagnóstico generado</h2>
-          <p>
-            <strong>Case ID:</strong> {result.case_id}
-          </p>
-
-          <pre className="app-pre">{result.diagnosis}</pre>
-
-          {result.source === "cases" && (
-            <p className="app-origin">
-              <strong>Origen:</strong> ⚙️ Base de casos guardados
-            </p>
-          )}
-          {result.source === "ai" && (
-            <p className="app-origin">
-              <strong>Origen:</strong> 🤖 Modelo de IA
-            </p>
-          )}
-        </section>
-      )}
-
-      {/* Errores al cargar casos */}
-      {casesError && <p className="app-error">⚠️ {casesError}</p>}
-
-      {/* Lista de casos (si ya tenés handleLoadCases y setCases) */}
-      {cases.length > 0 && (
-        <section className="app-section">
-          <h2>Casos guardados</h2>
-          <div className="app-cases-list">
-            {cases.map((c) => (
-              <div key={c.id} className="app-case-item">
-                <strong>ID {c.id}</strong> · {c.brand} {c.model} ·{" "}
-                <span>{c.error_code || "Sin código"}</span>
-              </div>
-            ))}
+        <form onSubmit={handleSubmit} className="app-form">
+          <div>
+            <div className="app-label">Marca</div>
+            <input
+              className="app-input"
+              placeholder="Linde, Clark, BT..."
+              value={brand}
+              onChange={(e) => setBrand(e.target.value)}
+            />
           </div>
-        </section>
-      )}
+
+          <div>
+            <div className="app-label">Modelo</div>
+            <input
+              className="app-input"
+              placeholder="E20, TM15..."
+              value={model}
+              onChange={(e) => setModel(e.target.value)}
+            />
+          </div>
+
+          <div>
+            <div className="app-label">Serie (opcional)</div>
+            <input
+              className="app-input"
+              placeholder="335, 336, 1275..."
+              value={series}
+              onChange={(e) => setSeries(e.target.value)}
+            />
+          </div>
+
+          <div>
+            <div className="app-label">Código de error (opcional)</div>
+            <input
+              className="app-input"
+              placeholder="E225, 07, A1-34..."
+              value={errorCode}
+              onChange={(e) => setErrorCode(e.target.value)}
+            />
+          </div>
+
+          <div>
+            <div className="app-label">Síntoma</div>
+            <textarea
+              className="app-textarea"
+              placeholder="No levanta carga, se corta al mover, etc."
+              value={symptom}
+              onChange={(e) => setSymptom(e.target.value)}
+            />
+          </div>
+
+          <div>
+            <div className="app-label">Checks realizados</div>
+            <textarea
+              className="app-textarea"
+              placeholder="Batería OK, motor OK, cables revisados..."
+              value={checksDone}
+              onChange={(e) => setChecksDone(e.target.value)}
+            />
+          </div>
+
+          <button type="submit" className="app-button">
+            Obtener diagnóstico
+          </button>
+        </form>
+
+        {/* Errores */}
+        {error && <p className="app-error">⚠️ Error: {error}</p>}
+
+        {/* Diagnóstico */}
+        {result && (
+          <section className="app-section">
+            <h2>Diagnóstico generado</h2>
+            <p>
+              <strong>Case ID:</strong> {result.case_id}
+            </p>
+
+            <pre className="app-pre">{result.diagnosis}</pre>
+
+            {result.source === "cases" && (
+              <p className="app-origin">
+                <strong>Origen:</strong> ⚙️ Base de casos guardados
+              </p>
+            )}
+            {result.source === "ai" && (
+              <p className="app-origin">
+                <strong>Origen:</strong> 🤖 Modelo de IA
+              </p>
+            )}
+          </section>
+        )}
+
+        <button
+          type="button"
+          onClick={handleLoadCases}
+          style={{ marginTop: "1rem" }}
+        >
+          Cargar casos guardados
+        </button>
+
+        {/* Errores al cargar casos */}
+        {casesError && <p className="app-error">⚠️ {casesError}</p>}
+
+        {/* Lista de casos */}
+        {cases.length > 0 && (
+          <section className="app-section">
+            <h2>Casos guardados</h2>
+            <div className="app-cases-list">
+              {cases.map((c) => (
+                <div key={c.id} className="app-case-item">
+                  <strong>ID {c.id}</strong> · {c.brand} {c.model} ·{" "}
+                  <span>{c.error_code || "Sin código"}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+      </div>
     </div>
-  </div>
-);
-
-
+  );
 }
 
 export default App;
