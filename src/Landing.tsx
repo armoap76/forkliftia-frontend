@@ -4,10 +4,10 @@ import { auth, googleProvider } from "./firebase";
 
 export default function Landing() {
   const navigate = useNavigate();
-
-  const handleOpenDiagnosis = async () => {
-    await signInWithPopup(auth, googleProvider);
-    navigate("/diagnosis");
+ 
+ const handleOpenDiagnosis = async () => { 
+      await signInWithPopup(auth, googleProvider);
+      navigate("/diagnosis");
   };
 
   return (
@@ -237,7 +237,7 @@ export default function Landing() {
         </section>
       </div>
 
-      {/* FOOTER */}
+            {/* FOOTER */}
       <footer
         style={{
           width: "100%",
@@ -250,8 +250,7 @@ export default function Landing() {
         }}
       >
         Project in development. ForkliftIA does not distribute service manuals.
-        Information is summarized from private technical sources and field
-        cases.
+        Information is summarized from private technical sources and field cases.
       </footer>
 
       {/* MEDIA QUERIES */}

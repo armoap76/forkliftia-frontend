@@ -1,23 +1,13 @@
-import { onAuthStateChanged, type User } from "firebase/auth";
-import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import { auth } from "./firebase";
+import { useAuthUser } from "./useAuthUser";
 
 export function AuthGate({ children }: { children: React.ReactNode }) {
-  const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => {
-      setUser(u);
-      setLoading(false);
-    });
-    return () => unsub();
-  }, []);
+  const { user, loading } = useAuthUser();
 
   if (loading) return <div style={{ padding: 24 }}>Loading…</div>;
   if (!user) return <Navigate to="/" replace />;
-  
+
   return <>{children}</>;
 }
+
 
