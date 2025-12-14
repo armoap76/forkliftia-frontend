@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Landing from "./Landing";
 import Diagnosis from "./Diagnosis";
@@ -23,5 +22,3 @@ function App() {
 }
 
 export default App;
-
-

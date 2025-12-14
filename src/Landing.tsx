@@ -5,6 +5,11 @@ import { auth, googleProvider } from "./firebase";
 export default function Landing() {
   const navigate = useNavigate();
 
+  const handleOpenDiagnosis = async () => {
+    await signInWithPopup(auth, googleProvider);
+    navigate("/diagnosis");
+  };
+
   return (
     <div
       style={{
@@ -150,11 +155,7 @@ export default function Landing() {
               diagnostic path.
             </p>
             <button
-              onClick={async () => {
-              await signInWithPopup(auth, googleProvider);
-              onOpenDiagnosis();
-}}
-
+              onClick={handleOpenDiagnosis}
               style={{
                 marginTop: 12,
                 padding: "10px 20px",
@@ -249,16 +250,25 @@ export default function Landing() {
         }}
       >
         Project in development. ForkliftIA does not distribute service manuals.
-        Information is summarized from private technical sources and field cases.
+        Information is summarized from private technical sources and field
+        cases.
       </footer>
 
+      {/* MEDIA QUERIES */}
       <style>{`
         @media (max-width: 768px) {
-          h1 { font-size: 36px !important; }
-          img { width: 90px !important; height: 90px !important; }
+          h1 {
+            font-size: 36px !important;
+          }
+          img {
+            width: 90px !important;
+            height: 90px !important;
+          }
         }
         @media (max-width: 480px) {
-          h1 { font-size: 28px !important; }
+          h1 {
+            font-size: 28px !important;
+          }
         }
       `}</style>
     </div>
