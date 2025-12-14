@@ -1,13 +1,38 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { signInWithPopup } from "firebase/auth";
+import { signInWithPopup, signOut } from "firebase/auth";
 import { auth, googleProvider } from "./firebase";
+import { useAuthUser } from "./useAuthUser";
 
 export default function Landing() {
   const navigate = useNavigate();
- 
- const handleOpenDiagnosis = async () => { 
-      await signInWithPopup(auth, googleProvider);
+  const { user } = useAuthUser();
+  const [busy, setBusy] = useState(false);
+
+  const handleOpenDiagnosis = async () => {
+    if (busy) return;
+    setBusy(true);
+
+    try {
+      // Si ya está logueado, no vuelvas a abrir popup
+      if (!auth.currentUser) {
+        await signInWithPopup(auth, googleProvider);
+      }
       navigate("/diagnosis");
+    } catch (e: any) {
+      console.error("Login error:", e);
+      alert(e?.code || e?.message || "Login error");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+    } catch (e) {
+      console.error("Logout error:", e);
+    }
   };
 
   return (
@@ -62,6 +87,33 @@ export default function Landing() {
             }}
           />
 
+          {user && (
+            <div
+              style={{
+                fontSize: 13,
+                color: "#0b2545",
+                marginBottom: 12,
+                textAlign: "center",
+              }}
+            >
+              Logged in as: <b>{user.email}</b>{" "}
+              <button
+                onClick={handleLogout}
+                style={{
+                  marginLeft: 10,
+                  padding: "4px 12px",
+                  borderRadius: 999,
+                  border: "1px solid #d1d5db",
+                  background: "#ffffff",
+                  cursor: "pointer",
+                  fontSize: 12,
+                }}
+              >
+                Logout
+              </button>
+            </div>
+          )}
+
           <h1
             style={{
               margin: 0,
@@ -73,6 +125,7 @@ export default function Landing() {
           >
             ForkliftIA
           </h1>
+
           <p
             style={{
               margin: "6px 0",
@@ -83,6 +136,7 @@ export default function Landing() {
           >
             Technical intelligence for forklift technicians.
           </p>
+
           <p
             style={{
               marginTop: 8,
@@ -142,6 +196,7 @@ export default function Landing() {
             >
               AI Troubleshooting
             </h2>
+
             <p
               style={{
                 fontSize: 14,
@@ -154,31 +209,36 @@ export default function Landing() {
               field cases and an internal technical library to suggest a
               diagnostic path.
             </p>
+
             <button
               onClick={handleOpenDiagnosis}
+              disabled={busy}
               style={{
                 marginTop: 12,
                 padding: "10px 20px",
                 borderRadius: 999,
                 border: "none",
-                cursor: "pointer",
+                cursor: busy ? "not-allowed" : "pointer",
                 fontSize: 14,
                 fontWeight: 600,
                 backgroundColor: "#0b2545",
                 color: "#ffffff",
                 width: "100%",
                 transition: "all 0.2s",
+                opacity: busy ? 0.7 : 1,
               }}
               onMouseEnter={(e) => {
+                if (busy) return;
                 e.currentTarget.style.backgroundColor = "#0d2e5a";
                 e.currentTarget.style.transform = "translateY(-2px)";
               }}
               onMouseLeave={(e) => {
+                if (busy) return;
                 e.currentTarget.style.backgroundColor = "#0b2545";
                 e.currentTarget.style.transform = "translateY(0)";
               }}
             >
-              Open
+              {busy ? "Signing in..." : "Open"}
             </button>
           </div>
 
@@ -204,6 +264,7 @@ export default function Landing() {
             >
               Spare Parts Catalog
             </h2>
+
             <p
               style={{
                 fontSize: 14,
@@ -215,6 +276,7 @@ export default function Landing() {
               Structured lists of parts by brand and model. Reference codes,
               descriptions and components overview. Coming soon.
             </p>
+
             <button
               disabled
               style={{
@@ -237,7 +299,7 @@ export default function Landing() {
         </section>
       </div>
 
-            {/* FOOTER */}
+      {/* FOOTER */}
       <footer
         style={{
           width: "100%",
