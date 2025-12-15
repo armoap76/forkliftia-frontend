@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { auth } from "./firebase";
 
 type DiagnosisResponse = {
   case_id: number;
@@ -22,7 +23,6 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 if (!API_BASE_URL) {
   throw new Error("Missing VITE_API_BASE_URL env var");
 }
-
 
 export function DiagnosisForm() {
   const [brand, setBrand] = useState("");
@@ -48,9 +48,23 @@ export function DiagnosisForm() {
     setLoadingDiag(true);
 
     try {
+      // Verificar usuario autenticado
+      const user = auth.currentUser;
+      if (!user) {
+        alert("Not logged in");
+        setLoadingDiag(false);
+        return;
+      }
+
+      // Obtener token
+      const token = await user.getIdToken();
+
       const res = await fetch(`${API_BASE_URL}/diagnosis`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({
           brand,
           model,
@@ -77,7 +91,23 @@ export function DiagnosisForm() {
     setLoadingCases(true);
 
     try {
-      const res = await fetch(`${API_BASE_URL}/cases`);
+      // Verificar usuario autenticado
+      const user = auth.currentUser;
+      if (!user) {
+        alert("Not logged in");
+        setLoadingCases(false);
+        return;
+      }
+
+      // Obtener token
+      const token = await user.getIdToken();
+
+      const res = await fetch(`${API_BASE_URL}/cases`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
       if (!res.ok) throw new Error("Error al cargar casos");
 
       const data = (await res.json()) as Case[];
