@@ -17,7 +17,12 @@ type Case = {
   diagnosis: string;
 };
 
-const API_BASE_URL = "https://flk-backend.onrender.com";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
+
+if (!API_BASE_URL) {
+  throw new Error("Missing VITE_API_BASE_URL env var");
+}
+
 
 export function DiagnosisForm() {
   const [brand, setBrand] = useState("");
