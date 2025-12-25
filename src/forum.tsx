@@ -31,7 +31,7 @@ export default function Forum() {
   const [cases, setCases] = useState<Case[]>([]);
   const [selected, setSelected] = useState<Case | null>(null);
 
-  const [lang, setLang] = useState<Lang>(() => {
+  const [lang] = useState<Lang>(() => {
     const saved = localStorage.getItem("lang");
     return saved === "en" || saved === "es" ? saved : "es";
   });

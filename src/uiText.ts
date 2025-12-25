@@ -27,7 +27,7 @@ export const ui = {
     soon: "Soon",
 
     // Diagnosis form
-    diagnose: "Get diagnosis",
+    diagnosis: "Get diagnosis",
     generating: "Generating...",
     loadCases: "Load cases",
     loading: "Loading...",
@@ -103,7 +103,7 @@ export const ui = {
     soon: "Próximamente",
 
     // Diagnosis form
-    diagnose: "Obtener diagnóstico",
+    diagnosis: "Obtener diagnóstico",
     generating: "Generando...",
     loadCases: "Cargar casos",
     loading: "Cargando...",
