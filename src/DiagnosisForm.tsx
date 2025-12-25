@@ -373,7 +373,7 @@ export function DiagnosisForm() {
               ? lang === "es"
                 ? "Generando..."
                 : "Generating..."
-              : tr?.diagnose || (lang === "es" ? "Obtener diagnóstico" : "Get diagnosis")}
+              : tr?.diagnosis || (lang === "es" ? "Obtener diagnóstico" : "Get diagnosis")}
           </button>
 
           <button
