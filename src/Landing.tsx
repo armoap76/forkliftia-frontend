@@ -26,7 +26,24 @@ export default function Landing() {
       setBusy(false);
     }
   };
+  const handleOpenForum = async () => {
+    if (busy) return;
+    setBusy(true);
 
+    try {
+      if (!auth.currentUser) {
+        await signInWithPopup(auth, googleProvider);
+      }
+      navigate("/forum");
+    } catch (e: any) {
+      console.error("Login error:", e);
+      alert(e?.code || e?.message || "Login error");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  
   const handleLogout = async () => {
     try {
       await signOut(auth);
@@ -262,7 +279,7 @@ export default function Landing() {
                 fontWeight: 700,
               }}
             >
-              Spare Parts Catalog
+              Technical Forum
             </h2>
 
             <p
@@ -273,28 +290,30 @@ export default function Landing() {
                 marginBottom: 16,
               }}
             >
-              Structured lists of parts by brand and model. Reference codes,
-              descriptions and components overview. Coming soon.
+              Browse real field cases reported by forklift technicians.
+              View open problems and resolved fixes.
             </p>
 
             <button
-              disabled
+              onClick={handleOpenForum}
+              disabled={busy}
               style={{
                 marginTop: 12,
                 padding: "10px 20px",
                 borderRadius: 999,
                 border: "none",
+                cursor: busy ? "not-allowed" : "pointer",
                 fontSize: 14,
                 fontWeight: 600,
-                backgroundColor: "#e5e7eb",
-                color: "#0b2545",
-                cursor: "not-allowed",
+                backgroundColor: "#0b2545",
+                color: "#ffffff",
                 width: "100%",
-                opacity: 0.6,
+                opacity: busy ? 0.7 : 1,
               }}
             >
-              Soon
+              Open forum
             </button>
+
           </div>
         </section>
       </div>
