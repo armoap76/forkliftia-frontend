@@ -3,24 +3,11 @@ import { signInWithPopup } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { auth, googleProvider } from "./firebase";
 import { ui } from "./uiText";
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
+import { fetchCases } from "./api/client";
+import type { Case } from "./api/client";
 
 type Lang = "en" | "es";
 type Tab = "open" | "resolved";
-
-type Case = {
-  id: number;
-  brand: string;
-  model: string;
-  series?: string | null;
-  error_code?: string | null;
-  symptom: string;
-  checks_done?: string | null;
-  diagnosis: string;
-  status?: "open" | "resolved";
-  resolution_note?: string | null;
-};
 
 export default function Forum() {
   const navigate = useNavigate();
@@ -61,17 +48,9 @@ export default function Forum() {
       const u = auth.currentUser;
       if (!u) throw new Error(tr.notLoggedIn);
 
-      const token = await u.getIdToken();
       const status = nextTab ?? tab;
 
-      const res = await fetch(
-        `${API_BASE_URL}/cases?status=${encodeURIComponent(status)}&limit=200`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      if (!res.ok) throw new Error(await res.text());
-
-      const data = (await res.json()) as Case[];
+      const data = await fetchCases({ status, limit: 200 });
       setCases(data);
     } catch (e: any) {
       setError(e?.message ?? "Error");

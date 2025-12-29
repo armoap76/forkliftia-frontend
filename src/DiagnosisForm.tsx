@@ -1,34 +1,10 @@
 import { useEffect, useState } from "react";
 import { auth } from "./firebase";
+import { fetchCases, postDiagnosis, resolveCase } from "./api/client";
+import type { Case, DiagnosisResponse } from "./api/client";
 import { ui } from "./uiText";
 
 type Lang = "en" | "es";
-
-type DiagnosisResponse = {
-  case_id: number;
-  diagnosis: string;
-  source?: "cases" | "ai";
-};
-
-type Case = {
-  id: number;
-  brand: string;
-  model: string;
-  series?: string | null;
-  error_code?: string | null;
-  symptom: string;
-  checks_done?: string | null;
-  diagnosis: string;
-  status?: "open" | "resolved";
-  resolution_note?: string | null;
-  resolved_at?: string | null;
-};
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
-
-if (!API_BASE_URL) {
-  throw new Error("Missing VITE_API_BASE_URL env var");
-}
 
 export function DiagnosisForm() {
   // ---- idioma (UI + envío al backend) ----
@@ -81,31 +57,16 @@ export function DiagnosisForm() {
         return;
       }
 
-      const token = await user.getIdToken();
-
-      const res = await fetch(`${API_BASE_URL}/diagnosis`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          brand,
-          model,
-          series,
-          error_code: errorCode,
-          symptom,
-          checks_done: checksDone,
-          language: lang,
-        }),
+      const data = await postDiagnosis({
+        brand,
+        model,
+        series,
+        error_code: errorCode,
+        symptom,
+        checks_done: checksDone,
+        language: lang,
       });
 
-      if (!res.ok) {
-        const txt = await res.text();
-        throw new Error(txt || "Error consultando diagnóstico");
-      }
-
-      const data = (await res.json()) as DiagnosisResponse;
       setResult(data);
     } catch (err: any) {
       setError(err?.message ?? "Error desconocido");
@@ -125,18 +86,7 @@ export function DiagnosisForm() {
         return;
       }
 
-      const token = await user.getIdToken();
-
-      const res = await fetch(`${API_BASE_URL}/cases?limit=200`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (!res.ok) {
-        const txt = await res.text();
-        throw new Error(txt || "Error al cargar casos");
-      }
-
-      const data = (await res.json()) as Case[];
+      const data = await fetchCases({ limit: 200 });
       setCases(data);
     } catch (err: any) {
       setCasesError(err?.message ?? "Error desconocido");
@@ -156,8 +106,6 @@ export function DiagnosisForm() {
         return;
       }
 
-      const token = await user.getIdToken();
-
       const resolution_note = (resolutionById[caseId] || "").trim();
       if (!resolution_note) {
         alert(
@@ -168,19 +116,7 @@ export function DiagnosisForm() {
         return;
       }
 
-      const res = await fetch(`${API_BASE_URL}/cases/${caseId}/resolve`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ resolution_note }),
-      });
-
-      if (!res.ok) {
-        const txt = await res.text();
-        throw new Error(txt || "Error al cerrar caso");
-      }
+      await resolveCase(caseId, resolution_note);
 
       // refrescar para ver status actualizado
       await handleLoadCases();
