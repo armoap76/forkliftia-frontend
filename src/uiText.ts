@@ -87,6 +87,7 @@ export const ui = {
     commentPosted: "Comment added",
     loginToComment: "Please sign in to comment.",
     validationError: "Validation error.",
+    caseClosedNotice: "Case closed. To continue, create a new case.",
   },
 
   es: {
@@ -175,5 +176,6 @@ export const ui = {
     commentPosted: "Comentario publicado",
     loginToComment: "Iniciá sesión para comentar.",
     validationError: "Error de validación.",
+    caseClosedNotice: "Caso cerrado. Para continuar, creá un caso nuevo.",
   },
 } as const;
