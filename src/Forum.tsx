@@ -3,7 +3,7 @@ import { signInWithPopup } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { auth, googleProvider } from "./firebase";
 import { ui } from "./uiText";
-import { fetchCases, fetchCaseComments, postCaseComment, updateCase } from "./api/client";
+import { fetchCases, fetchCaseComments, postCaseComment, resolveCase, updateCase } from "./api/client";
 import type { Case, CaseComment } from "./api/client";
 
 type Lang = "en" | "es";
@@ -35,6 +35,9 @@ export default function Forum() {
     checks_done: "",
     diagnosis: "",
   });
+  const [resolutionNote, setResolutionNote] = useState("");
+  const [resolveBusy, setResolveBusy] = useState(false);
+  const [resolveError, setResolveError] = useState<string | null>(null);
 
   const [lang] = useState<Lang>(() => {
     const saved = localStorage.getItem("lang");
@@ -123,6 +126,8 @@ export default function Forum() {
     }
     setIsEditing(false);
     setEditError(null);
+    setResolutionNote(selected?.resolution_note || "");
+    setResolveError(null);
     setEditFields({
       brand: selected.brand || "",
       model: selected.model || "",
@@ -202,6 +207,42 @@ export default function Forum() {
       }
     } finally {
       setEditBusy(false);
+    }
+  }
+
+  async function handleResolve() {
+    if (!selected) return;
+
+    const note = resolutionNote.trim();
+    if (!note) {
+      setResolveError(tr.resolutionMissing);
+      return;
+    }
+
+    setResolveBusy(true);
+    setResolveError(null);
+
+    try {
+      await ensureLogin();
+      await resolveCase(selected.id, note);
+
+      setSelected((prev) => (prev ? { ...prev, status: "resolved", resolution_note: note } : prev));
+      setTab("resolved");
+      await loadCases("resolved");
+    } catch (e: any) {
+      if (e?.status === 401) {
+        setResolveError(tr.notLoggedIn);
+      } else if (e?.status === 403) {
+        setResolveError(e?.message ?? tr.caseClosedNotice);
+      } else if (e?.status === 409) {
+        setResolveError(e?.message ?? tr.caseClosedNotice);
+      } else if (e?.status === 422) {
+        setResolveError(e?.message ?? tr.validationError);
+      } else {
+        setResolveError(e?.message ?? "Error");
+      }
+    } finally {
+      setResolveBusy(false);
     }
   }
 
@@ -622,6 +663,40 @@ export default function Forum() {
                   </div>
                 </>
               )}
+
+              {selected.status === "open" && user && selected.created_by_uid === user.uid ? (
+                <div style={{ borderTop: "1px solid #e5e7eb", paddingTop: 10 }}>
+                  <div style={{ fontWeight: 900, marginBottom: 4 }}>Solución final</div>
+                  <textarea
+                    value={resolutionNote}
+                    onChange={(e) => setResolutionNote(e.target.value)}
+                    placeholder={tr.resolutionPlaceholder}
+                    rows={3}
+                    style={{ width: "100%", padding: 10, borderRadius: 10, border: "1px solid #e5e7eb", resize: "vertical" }}
+                  />
+                  <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", marginTop: 8 }}>
+                    <button
+                      onClick={handleResolve}
+                      disabled={resolveBusy}
+                      style={{
+                        padding: "10px 14px",
+                        borderRadius: 10,
+                        border: "none",
+                        background: "#0b2545",
+                        color: "#fff",
+                        fontWeight: 800,
+                        cursor: resolveBusy ? "not-allowed" : "pointer",
+                        opacity: resolveBusy ? 0.8 : 1,
+                      }}
+                    >
+                      {resolveBusy ? tr.closing : tr.closeCase}
+                    </button>
+                    {resolveError ? (
+                      <span style={{ color: "#b91c1c", fontWeight: 700 }}>{resolveError}</span>
+                    ) : null}
+                  </div>
+                </div>
+              ) : null}
 
               {selected.status === "resolved" && selected.resolution_note ? (
                 <div style={{ borderTop: "1px solid #e5e7eb", paddingTop: 10 }}>
