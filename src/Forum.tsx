@@ -279,6 +279,10 @@ export default function Forum() {
                     {c.symptom?.slice(0, 120) || ""}
                     {c.symptom && c.symptom.length > 120 ? "…" : ""}
                   </div>
+
+                  <div style={{ marginTop: 6, color: "#4b5563", fontSize: 12 }}>
+                    Author: <strong>{c.public_name || "Unknown"}</strong>
+                  </div>
                 </button>
               ))
             )}
@@ -303,6 +307,10 @@ export default function Forum() {
               <div style={{ fontWeight: 900, fontSize: 16 }}>
                 ID {selected.id} · {selected.brand} {selected.model}
                 {selected.series ? ` (${selected.series})` : ""}
+              </div>
+
+              <div style={{ color: "#4b5563", fontSize: 12 }}>
+                Author: <strong>{selected.public_name || "Unknown"}</strong>
               </div>
 
               <div style={{ color: "#6b7280", fontSize: 12 }}>
