@@ -38,9 +38,19 @@ export type Case = {
   diagnosis: string;
   public_name?: string | null;
   creator_public_name?: string | null;
+  created_by_uid?: string | null;
+  can_edit?: boolean;
   status?: "open" | "resolved";
   resolution_note?: string | null;
   resolved_at?: string | null;
+};
+
+export type CaseComment = {
+  id: number;
+  author_public_name?: string | null;
+  author_uid?: string | null;
+  body: string;
+  created_at: string;
 };
 
 type ApiRequestOptions = RequestInit & {
@@ -128,4 +138,56 @@ export async function updatePublicName(public_name: string) {
   }
 
   return res.json() as Promise<{ public_name: string }>;
+}
+
+export async function fetchCaseComments(caseId: number) {
+  const res = await apiFetch(`/cases/${caseId}/comments`);
+
+  if (!res.ok) {
+    const err = new Error(await res.text());
+    (err as any).status = res.status;
+    throw err;
+  }
+
+  return res.json() as Promise<CaseComment[]>;
+}
+
+export async function postCaseComment(caseId: number, body: string) {
+  const res = await apiFetch(`/cases/${caseId}/comments`, {
+    method: "POST",
+    json: true,
+    body: JSON.stringify({ body }),
+  });
+
+  if (!res.ok) {
+    const err = new Error(await res.text());
+    (err as any).status = res.status;
+    throw err;
+  }
+
+  return res.json() as Promise<CaseComment>;
+}
+
+export async function updateCase(
+  caseId: number,
+  payload: Partial<
+    Pick<
+      Case,
+      "brand" | "model" | "series" | "error_code" | "symptom" | "checks_done" | "diagnosis"
+    >
+  >
+) {
+  const res = await apiFetch(`/cases/${caseId}`, {
+    method: "PATCH",
+    json: true,
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    const err = new Error(await res.text());
+    (err as any).status = res.status;
+    throw err;
+  }
+
+  return res.json() as Promise<Case>;
 }

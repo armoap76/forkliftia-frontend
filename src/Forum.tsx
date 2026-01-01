@@ -3,8 +3,8 @@ import { signInWithPopup } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { auth, googleProvider } from "./firebase";
 import { ui } from "./uiText";
-import { fetchCases } from "./api/client";
-import type { Case } from "./api/client";
+import { fetchCases, fetchCaseComments, postCaseComment, updateCase } from "./api/client";
+import type { Case, CaseComment } from "./api/client";
 
 type Lang = "en" | "es";
 type Tab = "open" | "resolved";
@@ -17,6 +17,24 @@ export default function Forum() {
   const [error, setError] = useState<string | null>(null);
   const [cases, setCases] = useState<Case[]>([]);
   const [selected, setSelected] = useState<Case | null>(null);
+  const [comments, setComments] = useState<CaseComment[]>([]);
+  const [commentsError, setCommentsError] = useState<string | null>(null);
+  const [commentsBusy, setCommentsBusy] = useState(false);
+  const [commentBody, setCommentBody] = useState("");
+  const [commentBusy, setCommentBusy] = useState(false);
+  const [commentSuccess, setCommentSuccess] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editBusy, setEditBusy] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
+  const [editFields, setEditFields] = useState({
+    brand: "",
+    model: "",
+    series: "",
+    error_code: "",
+    symptom: "",
+    checks_done: "",
+    diagnosis: "",
+  });
 
   const [lang] = useState<Lang>(() => {
     const saved = localStorage.getItem("lang");
@@ -52,6 +70,12 @@ export default function Forum() {
 
       const data = await fetchCases({ status, limit: 200 });
       setCases(data);
+      if (selected) {
+        const updatedSelected = data.find((c) => c.id === selected.id);
+        if (updatedSelected) {
+          setSelected(updatedSelected);
+        }
+      }
     } catch (e: any) {
       setError(e?.message ?? "Error");
     } finally {
@@ -61,13 +85,119 @@ export default function Forum() {
 
   function getCreatorName(c: Case) {
     const name = (c.creator_public_name ?? c.public_name)?.trim();
-    return name && name.length > 0 ? name : "Anónimo";
+    if (name && name.length > 0) return name;
+    if (c.created_by_uid) return `${c.created_by_uid.slice(0, 6)}…`;
+    return "Usuario";
   }
+
+  function getAuthorName(comment: CaseComment) {
+    const name = comment.author_public_name?.trim();
+    if (name && name.length > 0) return name;
+    if (comment.author_uid) return `${comment.author_uid.slice(0, 6)}…`;
+    return "Usuario";
+  }
+
+  async function loadComments(caseId: number) {
+    setCommentsBusy(true);
+    setCommentsError(null);
+    try {
+      const list = await fetchCaseComments(caseId);
+      setComments(list);
+    } catch (e: any) {
+      setCommentsError(e?.message ?? "Error");
+    } finally {
+      setCommentsBusy(false);
+    }
+  }
+
+  useEffect(() => {
+    if (!selected) {
+      setComments([]);
+      setCommentBody("");
+      setCommentSuccess(null);
+      setCommentsError(null);
+      setIsEditing(false);
+      return;
+    }
+    setIsEditing(false);
+    setEditError(null);
+    setEditFields({
+      brand: selected.brand || "",
+      model: selected.model || "",
+      series: selected.series || "",
+      error_code: selected.error_code || "",
+      symptom: selected.symptom || "",
+      checks_done: selected.checks_done || "",
+      diagnosis: selected.diagnosis || "",
+    });
+    setCommentSuccess(null);
+    setCommentsError(null);
+    loadComments(selected.id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected?.id]);
 
   useEffect(() => {
     loadCases("open");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  async function handleSubmitComment() {
+    if (!selected) return;
+    const body = commentBody.trim();
+    if (!body) return;
+    setCommentBusy(true);
+    setCommentSuccess(null);
+    setCommentsError(null);
+    try {
+      await ensureLogin();
+      const created = await postCaseComment(selected.id, body);
+      setCommentBody("");
+      setComments((prev) => [created, ...prev]);
+      setCommentSuccess(tr.commentPosted);
+    } catch (e: any) {
+      if (e?.status === 401) {
+        setCommentsError(tr.loginToComment);
+      } else if (e?.status === 422) {
+        setCommentsError(e?.message ?? tr.validationError);
+      } else {
+        setCommentsError(e?.message ?? "Error");
+      }
+    } finally {
+      setCommentBusy(false);
+    }
+  }
+
+  async function handleSaveEdit() {
+    if (!selected) return;
+    setEditBusy(true);
+    setEditError(null);
+    try {
+      const payload = {
+        brand: editFields.brand.trim(),
+        model: editFields.model.trim(),
+        series: editFields.series.trim(),
+        error_code: editFields.error_code.trim(),
+        symptom: editFields.symptom.trim(),
+        checks_done: editFields.checks_done.trim(),
+        diagnosis: editFields.diagnosis.trim(),
+      };
+
+      const updated = await updateCase(selected.id, payload);
+      setIsEditing(false);
+      setSelected(updated);
+      await loadCases();
+    } catch (e: any) {
+      if (e?.status === 401) {
+        setEditError(tr.notLoggedIn);
+      } else if (e?.status === 422) {
+        setEditError(e?.message ?? tr.validationError);
+      } else {
+        setEditError(e?.message ?? "Error");
+      }
+    } finally {
+      setEditBusy(false);
+    }
+  }
 
   // Gate (login requerido)
   if (!user) {
@@ -318,6 +448,28 @@ export default function Forum() {
                 Por: <strong>{getCreatorName(selected)}</strong>
               </div>
 
+              {user && (selected.created_by_uid === user.uid || selected.can_edit) ? (
+                <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                  <button
+                    onClick={() => setIsEditing((prev) => !prev)}
+                    style={{
+                      padding: "8px 12px",
+                      borderRadius: 999,
+                      border: "1px solid #e5e7eb",
+                      background: "#fff",
+                      fontWeight: 800,
+                      cursor: "pointer",
+                    }}
+                  >
+                    {isEditing ? tr.cancelEdit : tr.editCase}
+                  </button>
+
+                  {editError ? (
+                    <div style={{ color: "#b91c1c", fontWeight: 700 }}>{editError}</div>
+                  ) : null}
+                </div>
+              ) : null}
+
               <div style={{ color: "#6b7280", fontSize: 12 }}>
                 {tr.status}: <strong>{selected.status || tab}</strong>
                 {selected.error_code ? (
@@ -327,22 +479,128 @@ export default function Forum() {
                 ) : null}
               </div>
 
-              <div>
-                <div style={{ fontWeight: 900, marginBottom: 4 }}>{tr.symptom}</div>
-                <div style={{ whiteSpace: "pre-wrap" }}>{selected.symptom}</div>
-              </div>
+              {isEditing ? (
+                <div style={{ display: "grid", gap: 10 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 10 }}>
+                    <div>
+                      <div style={{ fontWeight: 900, marginBottom: 4 }}>{tr.brand}</div>
+                      <input
+                        value={editFields.brand}
+                        onChange={(e) => setEditFields((prev) => ({ ...prev, brand: e.target.value }))}
+                        style={{ width: "100%", padding: 8, borderRadius: 8, border: "1px solid #e5e7eb" }}
+                      />
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 900, marginBottom: 4 }}>{tr.model}</div>
+                      <input
+                        value={editFields.model}
+                        onChange={(e) => setEditFields((prev) => ({ ...prev, model: e.target.value }))}
+                        style={{ width: "100%", padding: 8, borderRadius: 8, border: "1px solid #e5e7eb" }}
+                      />
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 900, marginBottom: 4 }}>{tr.seriesOptional}</div>
+                      <input
+                        value={editFields.series}
+                        onChange={(e) => setEditFields((prev) => ({ ...prev, series: e.target.value }))}
+                        style={{ width: "100%", padding: 8, borderRadius: 8, border: "1px solid #e5e7eb" }}
+                      />
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 900, marginBottom: 4 }}>{tr.errorCodeOptional}</div>
+                      <input
+                        value={editFields.error_code}
+                        onChange={(e) =>
+                          setEditFields((prev) => ({ ...prev, error_code: e.target.value }))
+                        }
+                        style={{ width: "100%", padding: 8, borderRadius: 8, border: "1px solid #e5e7eb" }}
+                      />
+                    </div>
+                  </div>
 
-              {selected.checks_done ? (
-                <div>
-                  <div style={{ fontWeight: 900, marginBottom: 4 }}>{tr.checksDone}</div>
-                  <div style={{ whiteSpace: "pre-wrap" }}>{selected.checks_done}</div>
+                  <div>
+                    <div style={{ fontWeight: 900, marginBottom: 4 }}>{tr.symptom}</div>
+                    <textarea
+                      value={editFields.symptom}
+                      onChange={(e) => setEditFields((prev) => ({ ...prev, symptom: e.target.value }))}
+                      rows={3}
+                      style={{ width: "100%", padding: 8, borderRadius: 8, border: "1px solid #e5e7eb", resize: "vertical" }}
+                    />
+                  </div>
+
+                  <div>
+                    <div style={{ fontWeight: 900, marginBottom: 4 }}>{tr.checksDone}</div>
+                    <textarea
+                      value={editFields.checks_done}
+                      onChange={(e) => setEditFields((prev) => ({ ...prev, checks_done: e.target.value }))}
+                      rows={3}
+                      style={{ width: "100%", padding: 8, borderRadius: 8, border: "1px solid #e5e7eb", resize: "vertical" }}
+                    />
+                  </div>
+
+                  <div>
+                    <div style={{ fontWeight: 900, marginBottom: 4 }}>{tr.diagnosis}</div>
+                    <textarea
+                      value={editFields.diagnosis}
+                      onChange={(e) => setEditFields((prev) => ({ ...prev, diagnosis: e.target.value }))}
+                      rows={3}
+                      style={{ width: "100%", padding: 8, borderRadius: 8, border: "1px solid #e5e7eb", resize: "vertical" }}
+                    />
+                  </div>
+
+                  <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+                    <button
+                      onClick={handleSaveEdit}
+                      disabled={editBusy}
+                      style={{
+                        padding: "10px 14px",
+                        borderRadius: 10,
+                        border: "none",
+                        background: "#0b2545",
+                        color: "#fff",
+                        fontWeight: 800,
+                        cursor: editBusy ? "not-allowed" : "pointer",
+                        opacity: editBusy ? 0.8 : 1,
+                      }}
+                    >
+                      {editBusy ? tr.saving : tr.saveChanges}
+                    </button>
+                    <button
+                      onClick={() => setIsEditing(false)}
+                      disabled={editBusy}
+                      style={{
+                        padding: "10px 14px",
+                        borderRadius: 10,
+                        border: "1px solid #e5e7eb",
+                        background: "#fff",
+                        fontWeight: 800,
+                        cursor: editBusy ? "not-allowed" : "pointer",
+                      }}
+                    >
+                      {tr.cancelEdit}
+                    </button>
+                  </div>
                 </div>
-              ) : null}
+              ) : (
+                <>
+                  <div>
+                    <div style={{ fontWeight: 900, marginBottom: 4 }}>{tr.symptom}</div>
+                    <div style={{ whiteSpace: "pre-wrap" }}>{selected.symptom}</div>
+                  </div>
 
-              <div>
-                <div style={{ fontWeight: 900, marginBottom: 4 }}>{tr.diagnosis}</div>
-                <div style={{ whiteSpace: "pre-wrap" }}>{selected.diagnosis}</div>
-              </div>
+                  {selected.checks_done ? (
+                    <div>
+                      <div style={{ fontWeight: 900, marginBottom: 4 }}>{tr.checksDone}</div>
+                      <div style={{ whiteSpace: "pre-wrap" }}>{selected.checks_done}</div>
+                    </div>
+                  ) : null}
+
+                  <div>
+                    <div style={{ fontWeight: 900, marginBottom: 4 }}>{tr.diagnosis}</div>
+                    <div style={{ whiteSpace: "pre-wrap" }}>{selected.diagnosis}</div>
+                  </div>
+                </>
+              )}
 
               {selected.status === "resolved" && selected.resolution_note ? (
                 <div style={{ borderTop: "1px solid #e5e7eb", paddingTop: 10 }}>
@@ -354,6 +612,80 @@ export default function Forum() {
                   </div>
                 </div>
               ) : null}
+
+              <div style={{ borderTop: "1px solid #e5e7eb", paddingTop: 10 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+                  <div style={{ fontWeight: 900 }}>{tr.comments}</div>
+                  {commentsBusy ? (
+                    <span style={{ color: "#6b7280", fontSize: 12 }}>{tr.loading}</span>
+                  ) : null}
+                </div>
+
+                {commentsError ? (
+                  <div style={{ marginTop: 8, color: "#b91c1c", fontWeight: 700 }}>
+                    {commentsError}
+                  </div>
+                ) : null}
+
+                {user ? (
+                  <div style={{ marginTop: 8, display: "grid", gap: 6 }}>
+                    <textarea
+                      value={commentBody}
+                      onChange={(e) => setCommentBody(e.target.value)}
+                      placeholder={tr.commentPlaceholder}
+                      rows={3}
+                      style={{ width: "100%", padding: 10, borderRadius: 10, border: "1px solid #e5e7eb", resize: "vertical" }}
+                    />
+                    <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+                      <button
+                        onClick={handleSubmitComment}
+                        disabled={commentBusy || commentBody.trim().length === 0}
+                        style={{
+                          padding: "10px 14px",
+                          borderRadius: 10,
+                          border: "none",
+                          background: "#0b2545",
+                          color: "#fff",
+                          fontWeight: 800,
+                          cursor: commentBusy ? "not-allowed" : "pointer",
+                          opacity: commentBusy ? 0.8 : 1,
+                        }}
+                      >
+                        {commentBusy ? tr.posting : tr.comment}
+                      </button>
+                      {commentSuccess ? (
+                        <span style={{ color: "#065f46", fontWeight: 700 }}>{commentSuccess}</span>
+                      ) : null}
+                    </div>
+                  </div>
+                ) : null}
+
+                <div style={{ marginTop: 12, display: "grid", gap: 10 }}>
+                  {comments.length === 0 && !commentsBusy ? (
+                    <div style={{ color: "#6b7280", fontSize: 13 }}>{tr.noComments}</div>
+                  ) : null}
+
+                  {comments.map((c) => (
+                    <div
+                      key={c.id}
+                      style={{
+                        border: "1px solid #e5e7eb",
+                        borderRadius: 12,
+                        padding: 10,
+                        background: "#f9fafb",
+                      }}
+                    >
+                      <div style={{ display: "flex", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
+                        <div style={{ fontWeight: 800 }}>{getAuthorName(c)}</div>
+                        <div style={{ color: "#6b7280", fontSize: 12 }}>
+                          {new Date(c.created_at).toLocaleString()}
+                        </div>
+                      </div>
+                      <div style={{ marginTop: 6, whiteSpace: "pre-wrap" }}>{c.body}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
         </div>
