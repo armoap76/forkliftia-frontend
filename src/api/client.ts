@@ -22,6 +22,11 @@ export type DiagnosisResponse = {
   source?: "cases" | "ai";
 };
 
+export type CurrentUser = {
+  uid: string;
+  public_name: string | null;
+};
+
 export type Case = {
   id: number;
   brand: string;
@@ -31,6 +36,7 @@ export type Case = {
   symptom: string;
   checks_done?: string | null;
   diagnosis: string;
+  public_name?: string | null;
   status?: "open" | "resolved";
   resolution_note?: string | null;
   resolved_at?: string | null;
@@ -97,4 +103,28 @@ export async function resolveCase(caseId: number, resolution_note: string) {
   if (!res.ok) {
     throw new Error(await res.text());
   }
+}
+
+export async function fetchMe() {
+  const res = await apiFetch("/me");
+
+  if (!res.ok) {
+    throw new Error(await res.text());
+  }
+
+  return res.json() as Promise<CurrentUser>;
+}
+
+export async function updatePublicName(public_name: string) {
+  const res = await apiFetch("/me/public-name", {
+    method: "PUT",
+    json: true,
+    body: JSON.stringify({ public_name }),
+  });
+
+  if (!res.ok) {
+    throw new Error(await res.text());
+  }
+
+  return res.json() as Promise<{ public_name: string }>;
 }

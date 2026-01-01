@@ -20,7 +20,7 @@ function App() {
         />
 
         <Route
-          path="/Forum"
+          path="/forum"
           element={
             <AuthGate>
               <Forum />
