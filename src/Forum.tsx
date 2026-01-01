@@ -52,6 +52,8 @@ export default function Forum() {
     return tab === "open" ? tr.openCases : tr.resolvedCases;
   }, [tab, tr]);
 
+  const isResolved = selected?.status === "resolved";
+
   async function ensureLogin() {
     if (auth.currentUser) return;
     await signInWithPopup(auth, googleProvider);
@@ -134,7 +136,7 @@ export default function Forum() {
     setCommentsError(null);
     loadComments(selected.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selected?.id]);
+  }, [selected?.id, selected?.status]);
 
   useEffect(() => {
     loadCases("open");
@@ -157,6 +159,8 @@ export default function Forum() {
     } catch (e: any) {
       if (e?.status === 401) {
         setCommentsError(tr.loginToComment);
+      } else if (e?.status === 403) {
+        setCommentsError(e?.message ?? tr.caseClosedNotice);
       } else if (e?.status === 422) {
         setCommentsError(e?.message ?? tr.validationError);
       } else {
@@ -189,6 +193,8 @@ export default function Forum() {
     } catch (e: any) {
       if (e?.status === 401) {
         setEditError(tr.notLoggedIn);
+      } else if (e?.status === 403) {
+        setEditError(e?.message ?? tr.caseClosedNotice);
       } else if (e?.status === 422) {
         setEditError(e?.message ?? tr.validationError);
       } else {
@@ -448,7 +454,7 @@ export default function Forum() {
                 Por: <strong>{getCreatorName(selected)}</strong>
               </div>
 
-              {user && (selected.created_by_uid === user.uid || selected.can_edit) ? (
+              {user && !isResolved && (selected.created_by_uid === user.uid || selected.can_edit) ? (
                 <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
                   <button
                     onClick={() => setIsEditing((prev) => !prev)}
@@ -478,6 +484,21 @@ export default function Forum() {
                   </>
                 ) : null}
               </div>
+
+              {isResolved ? (
+                <div
+                  style={{
+                    border: "1px solid #f59e0b",
+                    background: "#fffbeb",
+                    color: "#92400e",
+                    borderRadius: 10,
+                    padding: "10px 12px",
+                    fontWeight: 700,
+                  }}
+                >
+                  {tr.caseClosedNotice}
+                </div>
+              ) : null}
 
               {isEditing ? (
                 <div style={{ display: "grid", gap: 10 }}>
@@ -627,7 +648,7 @@ export default function Forum() {
                   </div>
                 ) : null}
 
-                {user ? (
+                {user && !isResolved ? (
                   <div style={{ marginTop: 8, display: "grid", gap: 6 }}>
                     <textarea
                       value={commentBody}
