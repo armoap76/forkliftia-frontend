@@ -59,6 +59,11 @@ export default function Forum() {
     }
   }
 
+  function getCreatorName(c: Case) {
+    const name = (c.creator_public_name ?? c.public_name)?.trim();
+    return name && name.length > 0 ? name : "Anónimo";
+  }
+
   useEffect(() => {
     loadCases("open");
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -281,7 +286,7 @@ export default function Forum() {
                   </div>
 
                   <div style={{ marginTop: 6, color: "#4b5563", fontSize: 12 }}>
-                    Author: <strong>{c.public_name || "Unknown"}</strong>
+                    Por: <strong>{getCreatorName(c)}</strong>
                   </div>
                 </button>
               ))
@@ -310,7 +315,7 @@ export default function Forum() {
               </div>
 
               <div style={{ color: "#4b5563", fontSize: 12 }}>
-                Author: <strong>{selected.public_name || "Unknown"}</strong>
+                Por: <strong>{getCreatorName(selected)}</strong>
               </div>
 
               <div style={{ color: "#6b7280", fontSize: 12 }}>
