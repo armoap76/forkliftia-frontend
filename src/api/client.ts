@@ -37,6 +37,7 @@ export type Case = {
   checks_done?: string | null;
   diagnosis: string;
   public_name?: string | null;
+  creator_public_name?: string | null;
   status?: "open" | "resolved";
   resolution_note?: string | null;
   resolved_at?: string | null;
