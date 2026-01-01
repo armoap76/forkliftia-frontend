@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { auth } from "./firebase";
-import { fetchCases, postDiagnosis, resolveCase } from "./api/client";
-import type { Case, DiagnosisResponse } from "./api/client";
+import { postDiagnosis } from "./api/client";
+import type { DiagnosisResponse } from "./api/client";
 import { ui } from "./uiText";
 
 type Lang = "en" | "es";
@@ -31,17 +32,7 @@ export function DiagnosisForm() {
   const [result, setResult] = useState<DiagnosisResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const [cases, setCases] = useState<Case[]>([]);
-  const [casesError, setCasesError] = useState<string | null>(null);
-
   const [loadingDiag, setLoadingDiag] = useState(false);
-  const [loadingCases, setLoadingCases] = useState(false);
-
-  // ---- resolve case ----
-  const [resolutionById, setResolutionById] = useState<Record<number, string>>(
-    {}
-  );
-  const [resolvingId, setResolvingId] = useState<number | null>(null);
 
   // ---- handlers ----
   async function handleSubmit(e: React.FormEvent) {
@@ -72,61 +63,6 @@ export function DiagnosisForm() {
       setError(err?.message ?? "Error desconocido");
     } finally {
       setLoadingDiag(false);
-    }
-  }
-
-  async function handleLoadCases() {
-    setCasesError(null);
-    setLoadingCases(true);
-
-    try {
-      const user = auth.currentUser;
-      if (!user) {
-        alert(tr?.notLoggedIn || "Not logged in");
-        return;
-      }
-
-      const data = await fetchCases({ limit: 200 });
-      setCases(data);
-    } catch (err: any) {
-      setCasesError(err?.message ?? "Error desconocido");
-    } finally {
-      setLoadingCases(false);
-    }
-  }
-
-  async function handleResolveCase(caseId: number) {
-    setCasesError(null);
-    setResolvingId(caseId);
-
-    try {
-      const user = auth.currentUser;
-      if (!user) {
-        alert(tr?.notLoggedIn || "Not logged in");
-        return;
-      }
-
-      const resolution_note = (resolutionById[caseId] || "").trim();
-      if (!resolution_note) {
-        alert(
-          lang === "es"
-            ? "Escribí la solución aplicada (aunque sea una línea)."
-            : "Write the final fix applied (at least one line)."
-        );
-        return;
-      }
-
-      await resolveCase(caseId, resolution_note);
-
-      // refrescar para ver status actualizado
-      await handleLoadCases();
-
-      // limpiar input de ese caso
-      setResolutionById((prev) => ({ ...prev, [caseId]: "" }));
-    } catch (err: any) {
-      setCasesError(err?.message ?? "Error desconocido");
-    } finally {
-      setResolvingId(null);
     }
   }
 
@@ -168,32 +104,11 @@ export function DiagnosisForm() {
     color: "#ffffff",
   };
 
-  const secondaryBtn: React.CSSProperties = {
-    padding: "10px 16px",
-    borderRadius: 999,
-    border: "1px solid #d1d5db",
-    cursor: "pointer",
-    fontSize: 14,
-    fontWeight: 600,
-    backgroundColor: "#ffffff",
-    color: "#111827",
-  };
-
   const helperText: React.CSSProperties = {
     marginTop: 6,
     fontSize: 12,
     color: "#6b7280",
   };
-
-  const badge = (status: string): React.CSSProperties => ({
-    fontSize: 12,
-    padding: "3px 8px",
-    borderRadius: 999,
-    border: "1px solid #e5e7eb",
-    background: status === "resolved" ? "#ecfdf5" : "#fff7ed",
-    color: "#111827",
-    fontWeight: 800,
-  });
 
   return (
     <div>
@@ -312,18 +227,24 @@ export function DiagnosisForm() {
               : tr?.diagnosis || (lang === "es" ? "Obtener diagnóstico" : "Get diagnosis")}
           </button>
 
-          <button
-            type="button"
-            onClick={handleLoadCases}
-            style={secondaryBtn}
-            disabled={loadingCases}
+          <Link
+            to="/forum"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "10px 14px",
+              borderRadius: 999,
+              border: "1px solid #d1d5db",
+              textDecoration: "none",
+              fontSize: 14,
+              fontWeight: 700,
+              color: "#0b2545",
+              backgroundColor: "#ffffff",
+            }}
           >
-            {loadingCases
-              ? lang === "es"
-                ? "Cargando..."
-                : "Loading..."
-              : tr?.loadCases || (lang === "es" ? "Cargar casos guardados" : "Load saved cases")}
-          </button>
+            {lang === "es" ? "Ver casos en el foro" : "View cases in the forum"}
+          </Link>
         </div>
 
         <div style={{ ...helperText, marginTop: 10 }}>
@@ -406,130 +327,6 @@ export function DiagnosisForm() {
         </div>
       )}
 
-      {/* ERROR CASES */}
-      {casesError && (
-        <div
-          style={{
-            background: "#fef2f2",
-            border: "1px solid #fecaca",
-            color: "#991b1b",
-            borderRadius: 12,
-            padding: "10px 12px",
-            marginTop: 14,
-            fontSize: 13,
-          }}
-        >
-          ⚠️ {casesError}
-        </div>
-      )}
-
-      {/* CASES LIST */}
-      {cases.length > 0 && (
-        <div
-          style={{
-            borderRadius: 16,
-            border: "1px solid #e5e7eb",
-            backgroundColor: "#ffffff",
-            padding: 14,
-            marginTop: 14,
-          }}
-        >
-          <h3 style={{ marginTop: 0, marginBottom: 10, color: "#0b2545" }}>
-            {lang === "es" ? "Casos guardados" : "Saved cases"} ({cases.length})
-          </h3>
-
-          <div style={{ display: "grid", gap: 10 }}>
-            {cases.map((c) => {
-              const status = c.status || "open";
-              const isResolved = status === "resolved";
-              const isBusy = resolvingId === c.id;
-
-              return (
-                <div
-                  key={c.id}
-                  style={{
-                    padding: "10px 12px",
-                    borderRadius: 12,
-                    border: "1px solid #e5e7eb",
-                    backgroundColor: "#f9fafb",
-                    fontSize: 13,
-                    color: "#111827",
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      gap: 10,
-                      flexWrap: "wrap",
-                      alignItems: "center",
-                    }}
-                  >
-                    <div style={{ fontWeight: 900 }}>
-                      ID {c.id} · {c.brand} {c.model}{" "}
-                      <span style={{ fontWeight: 700, color: "#6b7280" }}>
-                        [{status}]
-                      </span>
-                    </div>
-
-                    <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                      <span style={{ color: "#6b7280" }}>{c.error_code || "—"}</span>
-                      <span style={badge(status)}>
-                        {isResolved ? tr?.resolved || "Resolved" : tr?.open || "Open"}
-                      </span>
-                    </div>
-                  </div>
-
-                  {!isResolved ? (
-                    <div style={{ marginTop: 10, display: "flex", gap: 10, flexWrap: "wrap" }}>
-                      <input
-                        style={{ ...inputStyle, flex: "1 1 320px" }}
-                        value={resolutionById[c.id] || ""}
-                        onChange={(e) =>
-                          setResolutionById((prev) => ({
-                            ...prev,
-                            [c.id]: e.target.value,
-                          }))
-                        }
-                        placeholder={
-                          tr?.resolutionPlaceholder ||
-                          (lang === "es"
-                            ? "Solución aplicada (ej: cambio ficha solenoide, ajuste sensor, etc.)"
-                            : "Final fix applied (e.g. replace solenoid connector, adjust sensor, etc.)")
-                        }
-                      />
-
-                      <button
-                        style={{
-                          ...primaryBtn,
-                          opacity: isBusy ? 0.75 : 1,
-                          cursor: isBusy ? "not-allowed" : "pointer",
-                        }}
-                        disabled={isBusy}
-                        onClick={() => handleResolveCase(c.id)}
-                        type="button"
-                      >
-                        {isBusy
-                          ? tr?.closing || (lang === "es" ? "Cerrando..." : "Closing...")
-                          : tr?.closeCase || (lang === "es" ? "Cerrar caso" : "Close case")}
-                      </button>
-                    </div>
-                  ) : (
-                    <div style={{ marginTop: 8, color: "#065f46", fontWeight: 800 }}>
-                      ✅ {lang === "es" ? "Resuelto" : "Resolved"}
-                      {c.resolution_note ? (
-                        <div style={{ marginTop: 6, color: "#111827", fontWeight: 600 }}>
-                          {c.resolution_note}
-                        </div>
-                      ) : null}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
