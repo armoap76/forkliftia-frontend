@@ -112,7 +112,9 @@ export async function resolveCase(caseId: number, resolution_note: string) {
   });
 
   if (!res.ok) {
-    throw new Error(await res.text());
+    const err = new Error(await res.text());
+    (err as any).status = res.status;
+    throw err;
   }
 }
 
