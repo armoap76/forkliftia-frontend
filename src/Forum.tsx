@@ -38,6 +38,7 @@ export default function Forum() {
   const [resolutionNote, setResolutionNote] = useState("");
   const [resolveBusy, setResolveBusy] = useState(false);
   const [resolveError, setResolveError] = useState<string | null>(null);
+  const [showResolveModal, setShowResolveModal] = useState(false);
 
   const [lang] = useState<Lang>(() => {
     const saved = localStorage.getItem("lang");
@@ -56,6 +57,7 @@ export default function Forum() {
   }, [tab, tr]);
 
   const isResolved = selected?.status === "resolved";
+  const isCaseCreator = !!(user && selected && selected.created_by_uid === user.uid);
 
   async function ensureLogin() {
     if (auth.currentUser) return;
@@ -128,6 +130,7 @@ export default function Forum() {
     setEditError(null);
     setResolutionNote(selected?.resolution_note || "");
     setResolveError(null);
+    setShowResolveModal(false);
     setEditFields({
       brand: selected.brand || "",
       model: selected.model || "",
@@ -165,6 +168,8 @@ export default function Forum() {
       if (e?.status === 401) {
         setCommentsError(tr.loginToComment);
       } else if (e?.status === 403) {
+        setCommentsError(e?.message ?? tr.caseClosedNotice);
+      } else if (e?.status === 409) {
         setCommentsError(e?.message ?? tr.caseClosedNotice);
       } else if (e?.status === 422) {
         setCommentsError(e?.message ?? tr.validationError);
@@ -219,6 +224,11 @@ export default function Forum() {
       return;
     }
 
+    if (note.length < 10) {
+      setResolveError(tr.resolutionTooShort);
+      return;
+    }
+
     setResolveBusy(true);
     setResolveError(null);
 
@@ -228,6 +238,8 @@ export default function Forum() {
 
       setSelected((prev) => (prev ? { ...prev, status: "resolved", resolution_note: note } : prev));
       setTab("resolved");
+      setShowResolveModal(false);
+      setCommentBody("");
       await loadCases("resolved");
     } catch (e: any) {
       if (e?.status === 401) {
@@ -309,7 +321,8 @@ export default function Forum() {
   }
 
   return (
-    <div style={{ maxWidth: 1100, margin: "0 auto", padding: 18 }}>
+    <>
+      <div style={{ maxWidth: 1100, margin: "0 auto", padding: 18 }}>
       {/* HOME + TITLE */}
       <button
         onClick={() => navigate("/")}
@@ -417,7 +430,7 @@ export default function Forum() {
         </div>
       ) : null}
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginTop: 14 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginTop: 14 }}>
         {/* LISTA */}
         <div
           style={{
@@ -514,6 +527,29 @@ export default function Forum() {
                   {editError ? (
                     <div style={{ color: "#b91c1c", fontWeight: 700 }}>{editError}</div>
                   ) : null}
+                </div>
+              ) : null}
+
+              {!isResolved && isCaseCreator ? (
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+                  <button
+                    onClick={() => {
+                      setResolutionNote("");
+                      setResolveError(null);
+                      setShowResolveModal(true);
+                    }}
+                    style={{
+                      padding: "8px 12px",
+                      borderRadius: 999,
+                      border: "1px solid #0b2545",
+                      background: "#0b2545",
+                      color: "#fff",
+                      fontWeight: 800,
+                      cursor: "pointer",
+                    }}
+                  >
+                    {tr.closeCase}
+                  </button>
                 </div>
               ) : null}
 
@@ -664,40 +700,6 @@ export default function Forum() {
                 </>
               )}
 
-              {selected.status === "open" && user && selected.created_by_uid === user.uid ? (
-                <div style={{ borderTop: "1px solid #e5e7eb", paddingTop: 10 }}>
-                  <div style={{ fontWeight: 900, marginBottom: 4 }}>Solución final</div>
-                  <textarea
-                    value={resolutionNote}
-                    onChange={(e) => setResolutionNote(e.target.value)}
-                    placeholder={tr.resolutionPlaceholder}
-                    rows={3}
-                    style={{ width: "100%", padding: 10, borderRadius: 10, border: "1px solid #e5e7eb", resize: "vertical" }}
-                  />
-                  <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", marginTop: 8 }}>
-                    <button
-                      onClick={handleResolve}
-                      disabled={resolveBusy}
-                      style={{
-                        padding: "10px 14px",
-                        borderRadius: 10,
-                        border: "none",
-                        background: "#0b2545",
-                        color: "#fff",
-                        fontWeight: 800,
-                        cursor: resolveBusy ? "not-allowed" : "pointer",
-                        opacity: resolveBusy ? 0.8 : 1,
-                      }}
-                    >
-                      {resolveBusy ? tr.closing : tr.closeCase}
-                    </button>
-                    {resolveError ? (
-                      <span style={{ color: "#b91c1c", fontWeight: 700 }}>{resolveError}</span>
-                    ) : null}
-                  </div>
-                </div>
-              ) : null}
-
               {selected.status === "resolved" && selected.resolution_note ? (
                 <div style={{ borderTop: "1px solid #e5e7eb", paddingTop: 10 }}>
                   <div style={{ fontWeight: 900, color: "#065f46" }}>
@@ -723,7 +725,21 @@ export default function Forum() {
                   </div>
                 ) : null}
 
-                {user && !isResolved ? (
+                {isResolved ? (
+                  <div
+                    style={{
+                      marginTop: 8,
+                      padding: 10,
+                      borderRadius: 10,
+                      border: "1px solid #e5e7eb",
+                      background: "#f9fafb",
+                      color: "#374151",
+                      fontSize: 13,
+                    }}
+                  >
+                    {tr.commentsDisabledNote}
+                  </div>
+                ) : user ? (
                   <div style={{ marginTop: 8, display: "grid", gap: 6 }}>
                     <textarea
                       value={commentBody}
@@ -785,7 +801,108 @@ export default function Forum() {
             </div>
           )}
         </div>
+        </div>
       </div>
-    </div>
+
+      {showResolveModal ? (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.45)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 16,
+            zIndex: 50,
+          }}
+        >
+          <div
+            style={{
+              background: "#fff",
+              borderRadius: 14,
+              padding: 18,
+              width: "100%",
+              maxWidth: 520,
+              boxShadow: "0 10px 40px rgba(0,0,0,0.25)",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
+              <h3 style={{ margin: 0 }}>{tr.closeCase}</h3>
+              <button
+                onClick={() => {
+                  if (resolveBusy) return;
+                  setShowResolveModal(false);
+                  setResolveError(null);
+                }}
+                style={{
+                  border: "none",
+                  background: "transparent",
+                  fontSize: 18,
+                  cursor: resolveBusy ? "not-allowed" : "pointer",
+                }}
+                disabled={resolveBusy}
+                aria-label="Cerrar"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div style={{ marginTop: 10, display: "grid", gap: 8 }}>
+              <label style={{ fontWeight: 800 }}>{tr.finalSolution}</label>
+              <textarea
+                value={resolutionNote}
+                onChange={(e) => setResolutionNote(e.target.value)}
+                placeholder={tr.resolutionPlaceholder}
+                rows={4}
+                style={{
+                  width: "100%",
+                  padding: 10,
+                  borderRadius: 10,
+                  border: "1px solid #e5e7eb",
+                  resize: "vertical",
+                }}
+              />
+              {resolveError ? (
+                <div style={{ color: "#b91c1c", fontWeight: 700 }}>{resolveError}</div>
+              ) : null}
+
+              <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", flexWrap: "wrap" }}>
+                <button
+                  onClick={() => setShowResolveModal(false)}
+                  disabled={resolveBusy}
+                  style={{
+                    padding: "10px 14px",
+                    borderRadius: 10,
+                    border: "1px solid #e5e7eb",
+                    background: "#fff",
+                    fontWeight: 800,
+                    cursor: resolveBusy ? "not-allowed" : "pointer",
+                  }}
+                >
+                  {tr.cancelEdit}
+                </button>
+                <button
+                  onClick={handleResolve}
+                  disabled={resolveBusy}
+                  style={{
+                    padding: "10px 14px",
+                    borderRadius: 10,
+                    border: "none",
+                    background: "#0b2545",
+                    color: "#fff",
+                    fontWeight: 800,
+                    cursor: resolveBusy ? "not-allowed" : "pointer",
+                    opacity: resolveBusy ? 0.8 : 1,
+                  }}
+                >
+                  {resolveBusy ? tr.closing : tr.closeCase}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </>
   );
 }

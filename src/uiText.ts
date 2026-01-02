@@ -56,12 +56,16 @@ export const ui = {
     resolved: "Resolved",
     closeCase: "Close case",
     closing: "Closing...",
+    finalSolution: "Final solution",
     resolution: "Resolution",
     resolutionPlaceholder:
       "Final fix applied (e.g. replace solenoid connector, adjust lift sensor)",
     resolutionMissing:
       "Write the final fix applied (at least one line).",
+    resolutionTooShort:
+      "Add a few more details (at least 10 characters).",
     resolvedLabel: "Resolved",
+    commentsDisabledNote: "Case closed. Comments are disabled.",
 
     // Forum
     forum: "Technical Forum",
@@ -145,12 +149,15 @@ export const ui = {
     resolved: "Resueltos",
     closeCase: "Cerrar caso",
     closing: "Cerrando...",
+    finalSolution: "Solución final",
     resolution: "Solución",
     resolutionPlaceholder:
       "Solución aplicada (ej: cambio ficha solenoide, ajuste sensor elevación)",
     resolutionMissing:
       "Escribí la solución aplicada (aunque sea una línea).",
+    resolutionTooShort: "Sumá un poco más de detalle (mínimo 10 caracteres).",
     resolvedLabel: "Resuelto",
+    commentsDisabledNote: "Caso cerrado. Comentarios deshabilitados.",
 
     // Forum
     forum: "Foro técnico",
