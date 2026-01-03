@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { DiagnosisForm } from "./DiagnosisForm";
+import { AppFooter } from "./Footer";
 
 export default function Diagnosis() {
   const navigate = useNavigate();
@@ -7,10 +8,10 @@ export default function Diagnosis() {
   return (
     <div
       style={{
-        height: "100vh",
+        minHeight: "100vh",
         backgroundColor: "#f5f5f5",
         display: "flex",
-        justifyContent: "center",
+        flexDirection: "column",
         alignItems: "center",
         padding: "16px",
         boxSizing: "border-box",
@@ -22,14 +23,13 @@ export default function Diagnosis() {
         style={{
           width: "100%",
           maxWidth: 980,
-          maxHeight: "92vh",
-          overflow: "auto",
           backgroundColor: "#ffffff",
           borderRadius: 24,
           padding: "20px 20px 24px",
           boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
           color: "#111827",
           boxSizing: "border-box",
+          marginTop: 12,
         }}
       >
         {/* Botón volver */}
@@ -46,7 +46,7 @@ export default function Diagnosis() {
             cursor: "pointer",
           }}
         >
-          ← Back to landing
+          ← Volver al inicio
         </button>
 
         {/* Header igual al landing */}
@@ -65,14 +65,18 @@ export default function Diagnosis() {
             ForkliftIA
           </h1>
           <p style={{ margin: "4px 0", color: "#f97316", fontWeight: 600 }}>
-            Technical intelligence for forklift technicians.
+            Inteligencia técnica para técnicos de autoelevadores.
           </p>
           <p style={{ marginTop: 8, color: "#021c3b", fontSize: 14 }}>
-            AI-assisted troubleshooting based on real field cases.
+            Diagnóstico asistido con casos reales y manuales.
           </p>
         </header>
 
         <DiagnosisForm />
+      </div>
+
+      <div style={{ marginTop: 16, width: "100%" }}>
+        <AppFooter />
       </div>
     </div>
   );

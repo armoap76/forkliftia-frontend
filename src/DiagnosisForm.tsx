@@ -122,7 +122,7 @@ export function DiagnosisForm() {
         }}
       >
         <label style={{ fontSize: 13, color: "#111827", fontWeight: 800 }}>
-          {tr?.language || (lang === "es" ? "Idioma" : "Language")}
+          {tr?.language || "Idioma"}
         </label>
         <select
           value={lang}
@@ -150,42 +150,46 @@ export function DiagnosisForm() {
           }}
         >
           <div>
-            <label style={labelStyle}>Brand</label>
+            <label style={labelStyle}>{tr?.brand || "Marca"}</label>
             <input
               style={inputStyle}
               value={brand}
               onChange={(e) => setBrand(e.target.value)}
-              placeholder="linde, bt, jungheinrich..."
+              placeholder={tr?.brandPlaceholder || "linde, bt, jungheinrich..."}
             />
           </div>
 
           <div>
-            <label style={labelStyle}>Model</label>
+            <label style={labelStyle}>{tr?.model || "Modelo"}</label>
             <input
               style={inputStyle}
               value={model}
               onChange={(e) => setModel(e.target.value)}
-              placeholder="e20, ose250..."
+              placeholder={tr?.modelPlaceholder || "e20, ose250..."}
             />
           </div>
 
           <div>
-            <label style={labelStyle}>Series (optional)</label>
+            <label style={labelStyle}>
+              {tr?.seriesOptional || "Serie (opcional)"}
+            </label>
             <input
               style={inputStyle}
               value={series}
               onChange={(e) => setSeries(e.target.value)}
-              placeholder="335..."
+              placeholder={tr?.seriesPlaceholder || "335..."}
             />
           </div>
 
           <div>
-            <label style={labelStyle}>Error code (optional)</label>
+            <label style={labelStyle}>
+              {tr?.errorCodeOptional || "Código de error (opcional)"}
+            </label>
             <input
               style={inputStyle}
               value={errorCode}
               onChange={(e) => setErrorCode(e.target.value)}
-              placeholder="e225..."
+              placeholder={tr?.errorCodePlaceholder || "e225..."}
             />
           </div>
 
@@ -195,11 +199,7 @@ export function DiagnosisForm() {
               style={textareaStyle}
               value={symptom}
               onChange={(e) => setSymptom(e.target.value)}
-              placeholder={
-                lang === "es"
-                  ? "No levanta carga, se corta, etc."
-                  : "Does not lift load, cuts out, etc."
-              }
+              placeholder={tr?.symptomPlaceholder || "No levanta carga, se corta, etc."}
             />
           </div>
 
@@ -210,9 +210,7 @@ export function DiagnosisForm() {
               value={checksDone}
               onChange={(e) => setChecksDone(e.target.value)}
               placeholder={
-                lang === "es"
-                  ? "Batería OK, fusibles OK, cables revisados..."
-                  : "Battery OK, fuses OK, cables checked..."
+                tr?.checksPlaceholder || "Batería OK, fusibles OK, cables revisados..."
               }
             />
           </div>
@@ -220,11 +218,7 @@ export function DiagnosisForm() {
 
         <div style={{ display: "flex", gap: 10, marginTop: 14, flexWrap: "wrap" }}>
           <button type="submit" style={primaryBtn} disabled={loadingDiag}>
-            {loadingDiag
-              ? lang === "es"
-                ? "Generando..."
-                : "Generating..."
-              : tr?.diagnosis || (lang === "es" ? "Obtener diagnóstico" : "Get diagnosis")}
+            {loadingDiag ? tr?.generating || "Generando..." : tr?.diagnosis || "Obtener diagnóstico"}
           </button>
 
           <Link
@@ -243,14 +237,12 @@ export function DiagnosisForm() {
               backgroundColor: "#ffffff",
             }}
           >
-            {lang === "es" ? "Ver casos en el foro" : "View cases in the forum"}
+            {tr?.forum || "Foro técnico"}
           </Link>
         </div>
 
         <div style={{ ...helperText, marginTop: 10 }}>
-          {lang === "es"
-            ? "Tip: en pantallas chicas se apila en 1 columna automáticamente."
-            : "Tip: on small screens it auto stacks into one column."}
+          Tip: en pantallas chicas se apila en 1 columna automáticamente.
         </div>
 
         <style>{`
@@ -292,18 +284,14 @@ export function DiagnosisForm() {
         >
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
             <h3 style={{ margin: 0, color: "#0b2545" }}>
-              {tr?.diagnosis || (lang === "es" ? "Diagnóstico" : "Diagnosis")}
+              {tr?.diagnosis || "Diagnóstico"}
             </h3>
             <span style={{ fontSize: 13, color: "#374151" }}>
-              <strong>Case ID:</strong> {result.case_id}
+              <strong>{tr?.caseId || "ID de caso"}:</strong> {result.case_id}
             </span>
             <span style={{ fontSize: 13, color: "#374151" }}>
-              <strong>{lang === "es" ? "Origen" : "Source"}:</strong>{" "}
-              {result.source === "cases"
-                ? lang === "es"
-                  ? "⚙️ Base de casos"
-                  : "⚙️ Case base"
-                : "🤖 AI"}
+              <strong>{tr?.source || "Origen"}:</strong>{" "}
+              {result.source === "cases" ? "⚙️ Base de casos" : "🤖 IA"}
             </span>
           </div>
 
