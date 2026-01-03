@@ -19,14 +19,7 @@ function App() {
           }
         />
 
-        <Route
-          path="/forum"
-          element={
-            <AuthGate>
-              <Forum />
-            </AuthGate>
-          }
-        />
+        <Route path="/forum" element={<Forum />} />
       </Routes>
     </BrowserRouter>
   );
