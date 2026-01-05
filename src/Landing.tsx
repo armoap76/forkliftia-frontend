@@ -160,7 +160,30 @@ export default function Landing() {
         </div>
       </main>
 
-      <div style={{ marginTop: 24, width: "100%" }}>
+      <section
+        style={{
+          marginTop: 16,
+          marginBottom: 8,
+          textAlign: "center",
+          color: "#6b7280",
+          fontSize: 13,
+          lineHeight: 1.5,
+        }}
+      >
+        <div>Contacto y soporte técnico</div>
+        <a
+          href="mailto:forkliftia.soporte@gmail.com"
+          style={{
+            color: "#6b7280",
+            textDecoration: "underline",
+            fontWeight: 600,
+          }}
+        >
+          forkliftia.soporte@gmail.com
+        </a>
+      </section>
+
+      <div style={{ marginTop: 16, width: "100%" }}>
         <AppFooter />
       </div>
     </div>
