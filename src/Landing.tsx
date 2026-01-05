@@ -88,7 +88,31 @@ export default function Landing() {
             lineHeight: 1.5,
           }}
         >
-          Diagnóstico técnico asistido para autoelevadores.
+          ForkliftIA es una plataforma técnica para diagnóstico de
+          autoelevadores.
+          <br />
+          Combina casos reales, códigos de error y manuales técnicos
+          <br />
+          para ayudarte a diagnosticar fallas más rápido y con mejor
+          criterio.
+        </p>
+
+        <p
+          style={{
+            marginTop: -12,
+            marginBottom: 24,
+            color: "#4b5563",
+            fontSize: 14,
+            lineHeight: 1.5,
+          }}
+        >
+          Los casos que no se resuelven pasan automáticamente al foro
+          técnico,
+          <br />
+          donde otros profesionales pueden aportar su experiencia.
+          <br />
+          Cuantos más casos reales se documentan, más útil se vuelve la
+          herramienta.
         </p>
 
         <div
