@@ -10,6 +10,7 @@ export type DiagnosisPayload = {
   brand: string;
   model: string;
   series?: string;
+  controller?: string | null;
   error_code?: string;
   symptom: string;
   checks_done?: string;

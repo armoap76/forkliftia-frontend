@@ -24,6 +24,7 @@ export function DiagnosisForm() {
   const [brand, setBrand] = useState("");
   const [model, setModel] = useState("");
   const [series, setSeries] = useState("");
+  const [controller, setController] = useState("");
   const [errorCode, setErrorCode] = useState("");
   const [symptom, setSymptom] = useState("");
   const [checksDone, setChecksDone] = useState("");
@@ -52,6 +53,7 @@ export function DiagnosisForm() {
         brand,
         model,
         series,
+        controller: controller.trim() || null,
         error_code: errorCode,
         symptom,
         checks_done: checksDone,
@@ -178,6 +180,16 @@ export function DiagnosisForm() {
               value={series}
               onChange={(e) => setSeries(e.target.value)}
               placeholder={tr?.seriesPlaceholder || "335..."}
+            />
+          </div>
+
+          <div>
+            <label style={labelStyle}>Controlador electrónico (opcional)</label>
+            <input
+              style={inputStyle}
+              value={controller}
+              onChange={(e) => setController(e.target.value)}
+              placeholder="Ej: ZAPI, Curtis, Sevcon"
             />
           </div>
 
