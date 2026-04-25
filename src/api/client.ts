@@ -28,6 +28,7 @@ export type DiagnosisResponse = {
 export type CurrentUser = {
   uid: string;
   public_name: string | null;
+  is_admin: boolean;
 };
 
 export type Case = {

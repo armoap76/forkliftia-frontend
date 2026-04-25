@@ -51,7 +51,7 @@ export function useAuthUser() {
   const setPublicName = (public_name: string) => {
     setMe((prev) => {
       if (prev) return { ...prev, public_name };
-      if (user) return { uid: user.uid, public_name };
+      if (user) return { uid: user.uid, public_name, is_admin: false };
       return prev;
     });
   };
@@ -61,6 +61,7 @@ export function useAuthUser() {
     loading,
     me,
     publicName: me?.public_name ?? null,
+    isAdmin: me?.is_admin ?? false,
     profileLoading,
     setPublicName,
   };
