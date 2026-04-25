@@ -35,11 +35,11 @@ export function DiagnosisForm() {
 
   const [loadingDiag, setLoadingDiag] = useState(false);
 
-  const sourceLabelByType: Record<string, string> = {
-    ai: "🤖 IA",
-    cases: "⚙️ Base de casos",
-    manuals: "📘 Manuales técnicos",
-    mixed: "🧩 Mixto (IA + casos + manuales)",
+  const originLabelByType: Record<string, string> = {
+    ai: "IA",
+    manuals: "Biblioteca técnica",
+    cases: "Base de casos",
+    mixed: "IA + biblioteca/casos",
   };
 
   // ---- handlers ----
@@ -132,8 +132,8 @@ export function DiagnosisForm() {
   };
 
   if (result) {
-    const sourceLabel = result.source
-      ? sourceLabelByType[result.source] ?? result.source
+    const originLabel = result.origin
+      ? originLabelByType[result.origin] ?? result.origin
       : null;
 
     return (
@@ -153,9 +153,9 @@ export function DiagnosisForm() {
           El caso ya fue publicado en el foro técnico.
         </p>
 
-        {sourceLabel ? (
+        {originLabel ? (
           <p style={{ margin: "10px 0 0", fontSize: 13, color: "#374151" }}>
-            <strong>{tr?.source || "Origen"}:</strong> {sourceLabel}
+            <strong>{tr?.source || "Origen"}:</strong> {originLabel}
           </p>
         ) : null}
 
@@ -173,7 +173,7 @@ export function DiagnosisForm() {
             color: "#111827",
           }}
         >
-          {result.diagnosis}
+          {result.diagnosis_text}
         </div>
 
         <div style={{ display: "flex", gap: 10, marginTop: 14, flexWrap: "wrap" }}>
