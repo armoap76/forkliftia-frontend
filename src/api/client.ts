@@ -20,7 +20,7 @@ export type DiagnosisPayload = {
 export type DiagnosisResponse = {
   case_id: number;
   diagnosis: string;
-  source?: "cases" | "ai";
+  source?: "cases" | "ai" | "manuals" | "mixed";
 };
 
 export type CurrentUser = {

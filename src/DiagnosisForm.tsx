@@ -35,6 +35,13 @@ export function DiagnosisForm() {
 
   const [loadingDiag, setLoadingDiag] = useState(false);
 
+  const sourceLabelByType: Record<string, string> = {
+    ai: "🤖 IA",
+    cases: "⚙️ Base de casos",
+    manuals: "📘 Manuales técnicos",
+    mixed: "🧩 Mixto (IA + casos + manuales)",
+  };
+
   // ---- handlers ----
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -66,6 +73,18 @@ export function DiagnosisForm() {
     } finally {
       setLoadingDiag(false);
     }
+  }
+
+  function handleNewDiagnosis() {
+    setBrand("");
+    setModel("");
+    setSeries("");
+    setController("");
+    setErrorCode("");
+    setSymptom("");
+    setChecksDone("");
+    setError(null);
+    setResult(null);
   }
 
   // ---- styles ----
@@ -111,6 +130,92 @@ export function DiagnosisForm() {
     fontSize: 12,
     color: "#6b7280",
   };
+
+  if (result) {
+    const sourceLabel = result.source
+      ? sourceLabelByType[result.source] ?? result.source
+      : null;
+
+    return (
+      <div
+        style={{
+          borderRadius: 16,
+          border: "1px solid #dbeafe",
+          backgroundColor: "#eff6ff",
+          padding: 16,
+        }}
+      >
+        <h2 style={{ margin: 0, color: "#0b2545" }}>Diagnóstico generado correctamente</h2>
+        <p style={{ margin: "8px 0 0", fontSize: 14, color: "#1f2937", fontWeight: 700 }}>
+          Caso #{result.case_id} creado y publicado en el foro técnico.
+        </p>
+        <p style={{ margin: "6px 0 0", fontSize: 13, color: "#374151" }}>
+          El caso ya fue publicado en el foro técnico.
+        </p>
+
+        {sourceLabel ? (
+          <p style={{ margin: "10px 0 0", fontSize: 13, color: "#374151" }}>
+            <strong>{tr?.source || "Origen"}:</strong> {sourceLabel}
+          </p>
+        ) : null}
+
+        <div
+          style={{
+            marginTop: 12,
+            padding: 12,
+            borderRadius: 12,
+            border: "1px solid #bfdbfe",
+            background: "#ffffff",
+            whiteSpace: "pre-wrap",
+            wordBreak: "break-word",
+            fontSize: 13,
+            lineHeight: 1.4,
+            color: "#111827",
+          }}
+        >
+          {result.diagnosis}
+        </div>
+
+        <div style={{ display: "flex", gap: 10, marginTop: 14, flexWrap: "wrap" }}>
+          <Link
+            to={`/forum/cases/${result.case_id}`}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "10px 14px",
+              borderRadius: 999,
+              border: "none",
+              textDecoration: "none",
+              fontSize: 14,
+              fontWeight: 700,
+              color: "#ffffff",
+              backgroundColor: "#0b2545",
+            }}
+          >
+            Ver caso en el foro
+          </Link>
+
+          <button
+            type="button"
+            onClick={handleNewDiagnosis}
+            style={{
+              padding: "10px 14px",
+              borderRadius: 999,
+              border: "1px solid #d1d5db",
+              background: "#ffffff",
+              color: "#0b2545",
+              fontSize: 14,
+              fontWeight: 700,
+              cursor: "pointer",
+            }}
+          >
+            Nuevo diagnóstico
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -280,50 +385,6 @@ export function DiagnosisForm() {
           }}
         >
           ⚠️ {error}
-        </div>
-      )}
-
-      {/* RESULT */}
-      {result && (
-        <div
-          style={{
-            borderRadius: 16,
-            border: "1px solid #e5e7eb",
-            backgroundColor: "#f9fafb",
-            padding: 14,
-            marginTop: 14,
-          }}
-        >
-          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
-            <h3 style={{ margin: 0, color: "#0b2545" }}>
-              {tr?.diagnosis || "Diagnóstico"}
-            </h3>
-            <span style={{ fontSize: 13, color: "#374151" }}>
-              <strong>{tr?.caseId || "ID de caso"}:</strong> {result.case_id}
-            </span>
-            <span style={{ fontSize: 13, color: "#374151" }}>
-              <strong>{tr?.source || "Origen"}:</strong>{" "}
-              {result.source === "cases" ? "⚙️ Base de casos" : "🤖 IA"}
-            </span>
-          </div>
-
-          <pre
-            style={{
-              marginTop: 10,
-              marginBottom: 0,
-              padding: 12,
-              borderRadius: 12,
-              backgroundColor: "#ffffff",
-              border: "1px solid #e5e7eb",
-              color: "#111827",
-              whiteSpace: "pre-wrap",
-              wordBreak: "break-word",
-              fontSize: 13,
-              lineHeight: 1.4,
-            }}
-          >
-            {result.diagnosis}
-          </pre>
         </div>
       )}
 
