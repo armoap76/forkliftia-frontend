@@ -186,6 +186,54 @@ export default function Landing() {
 
       <section
         style={{
+          width: "100%",
+          maxWidth: 520,
+          marginTop: 16,
+          padding: "16px 18px",
+          backgroundColor: "#fff8e8",
+          border: "1px solid #f1dfb8",
+          borderRadius: 14,
+          boxSizing: "border-box",
+          color: "#3f3a2f",
+        }}
+      >
+        <h2
+          style={{
+            margin: 0,
+            fontSize: 17,
+            fontWeight: 700,
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            justifyContent: "center",
+          }}
+        >
+          <span aria-hidden="true">⚠️</span>
+          Aviso importante
+        </h2>
+        <p
+          style={{
+            marginTop: 10,
+            marginBottom: 0,
+            fontSize: 14,
+            lineHeight: 1.6,
+            fontStyle: "italic",
+          }}
+        >
+          ForkliftIA brinda orientación técnica basada en casos reales,
+          documentación técnica resumida y asistencia de IA.
+          <br />
+          La información publicada es orientativa, no garantiza una
+          reparación y no reemplaza el criterio profesional ni la
+          documentación oficial del fabricante.
+          <br />
+          Toda intervención debe ser realizada únicamente por personal
+          técnico capacitado y bajo condiciones seguras de trabajo.
+        </p>
+      </section>
+
+      <section
+        style={{
           marginTop: 16,
           marginBottom: 8,
           textAlign: "center",
