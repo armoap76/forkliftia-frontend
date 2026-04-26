@@ -9,13 +9,11 @@ export function formatCaseTitle(c: Case) {
 export function getCreatorName(c: Case) {
   const name = (c.creator_public_name ?? c.public_name)?.trim();
   if (name && name.length > 0) return name;
-  if (c.created_by_uid) return `${c.created_by_uid.slice(0, 6)}…`;
   return "Usuario";
 }
 
 export function getAuthorName(comment: CaseComment) {
   const name = comment.author_public_name?.trim();
   if (name && name.length > 0) return name;
-  if (comment.author_uid) return `${comment.author_uid.slice(0, 6)}…`;
   return "Usuario";
 }

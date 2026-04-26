@@ -10,10 +10,10 @@ type PublicNameSetupProps = {
 function validateName(name: string) {
   const trimmed = name.trim();
   if (trimmed.length < 3 || trimmed.length > 32) {
-    return "Name must be between 3 and 32 characters.";
+    return "El nombre debe tener entre 3 y 32 caracteres.";
   }
   if (!/^[A-Za-z0-9_-]+$/.test(trimmed)) {
-    return "Only letters, numbers, dash (-) and underscore (_) are allowed.";
+    return "Solo se permiten letras, números, guion (-) y guion bajo (_).";
   }
   return null;
 }
@@ -46,7 +46,14 @@ export function PublicNameSetup({ onSaved, userDisplayName }: PublicNameSetupPro
       const response = await updatePublicName(trimmed);
       onSaved(response.public_name);
     } catch (e: any) {
-      setError(e?.message ?? "Error updating name");
+      const rawMessage = String(e?.message ?? "");
+      if (rawMessage.includes("PUBLIC_NAME_TAKEN")) {
+        setError("Ese nombre ya está en uso. Elegí otro.");
+      } else if (rawMessage.toLowerCase().includes("validation")) {
+        setError("Nombre inválido. Revisá el formato e intentá nuevamente.");
+      } else {
+        setError("No se pudo actualizar el nombre público.");
+      }
     } finally {
       setLoading(false);
     }
@@ -79,16 +86,15 @@ export function PublicNameSetup({ onSaved, userDisplayName }: PublicNameSetupPro
       >
         <div style={{ textAlign: "center" }}>
           <div style={{ fontWeight: 900, color: "#0b2545", fontSize: 20 }}>
-            Choose a public name{greeting}
+            Elegí tu nombre público{greeting}
           </div>
           <div style={{ color: "#4b5563", fontSize: 13, marginTop: 6 }}>
-            This name will appear in the forum and diagnosis cases. You can set it
-            only once.
+            Este nombre se verá en el foro y en tus casos.
           </div>
         </div>
 
         <label style={{ display: "grid", gap: 6, fontSize: 14 }}>
-          <span style={{ fontWeight: 700, color: "#111827" }}>Public name</span>
+          <span style={{ fontWeight: 700, color: "#111827" }}>Nombre público</span>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -102,7 +108,7 @@ export function PublicNameSetup({ onSaved, userDisplayName }: PublicNameSetupPro
             disabled={loading}
           />
           <span style={{ color: "#6b7280", fontSize: 12 }}>
-            3-32 characters. Letters, numbers, dash (-) and underscore (_).
+            3-32 caracteres. Letras, números, guion (-) y guion bajo (_).
           </span>
         </label>
 
@@ -137,7 +143,7 @@ export function PublicNameSetup({ onSaved, userDisplayName }: PublicNameSetupPro
             opacity: loading ? 0.7 : 1,
           }}
         >
-          {loading ? "Saving…" : "Save name"}
+          {loading ? "Guardando…" : "Guardar nombre"}
         </button>
       </form>
     </div>

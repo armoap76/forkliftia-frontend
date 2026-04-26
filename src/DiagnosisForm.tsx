@@ -4,10 +4,12 @@ import { auth } from "./firebase";
 import { postDiagnosis } from "./api/client";
 import type { DiagnosisResponse } from "./api/client";
 import { ui } from "./uiText";
+import { useAuthUser } from "./useAuthUser";
 
 type Lang = "en" | "es";
 
 export function DiagnosisForm() {
+  const { publicName } = useAuthUser();
   // ---- idioma (UI + envío al backend) ----
   const [lang, setLang] = useState<Lang>(() => {
     const saved = localStorage.getItem("lang");
@@ -53,6 +55,10 @@ export function DiagnosisForm() {
       const user = auth.currentUser;
       if (!user) {
         alert(tr?.notLoggedIn || "Not logged in");
+        return;
+      }
+      if (!publicName) {
+        setError("Antes de crear un caso, elegí tu nombre público.");
         return;
       }
 
