@@ -8,12 +8,14 @@ import {
   fetchCases,
   postCaseComment,
   resolveCase,
+  updateCaseComment,
   updateCase,
   type Case,
   type CaseComment,
 } from "./api/client";
 import { ForumHeader, type ForumTab } from "./ForumHeader";
 import { formatCaseTitle, getAuthorName, getCreatorName } from "./forumUtils";
+import { useAuthUser } from "./useAuthUser";
 
 export default function ForumCaseDetail() {
   const navigate = useNavigate();
@@ -39,6 +41,10 @@ export default function ForumCaseDetail() {
   const [commentBody, setCommentBody] = useState("");
   const [commentBusy, setCommentBusy] = useState(false);
   const [commentSuccess, setCommentSuccess] = useState<string | null>(null);
+  const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
+  const [editingCommentBody, setEditingCommentBody] = useState("");
+  const [commentEditBusy, setCommentEditBusy] = useState(false);
+  const [commentEditError, setCommentEditError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editBusy, setEditBusy] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
@@ -67,9 +73,12 @@ export default function ForumCaseDetail() {
 
   const tr = ui[lang];
   const user = auth.currentUser;
+  const { isAdmin } = useAuthUser();
 
   const isResolved = caseData?.status === "resolved";
   const isCaseCreator = !!(user && caseData && caseData.created_by_uid === user.uid);
+  const canEditCase = !!(user && caseData && !isResolved && (isCaseCreator || isAdmin || caseData.can_edit));
+  const canCloseCase = !!(user && caseData && !isResolved && (isCaseCreator || isAdmin));
 
   const statusLabel = useMemo(() => {
     if (!caseData) return "";
@@ -274,6 +283,39 @@ export default function ForumCaseDetail() {
     }
   }
 
+  async function handleSaveCommentEdit(commentId: number) {
+    if (!caseData) return;
+    const body = editingCommentBody.trim();
+    if (!body) return;
+
+    setCommentEditBusy(true);
+    setCommentEditError(null);
+    try {
+      await ensureLogin();
+      await updateCaseComment(caseData.id, commentId, body);
+      await loadComments(caseData.id);
+      setEditingCommentId(null);
+      setEditingCommentBody("");
+    } catch (e: any) {
+      if (e?.status === 401) {
+        setCommentEditError(tr.notLoggedIn);
+      } else if (e?.status === 403 || e?.status === 409) {
+        setCommentEditError(e?.message ?? tr.caseClosedNotice);
+      } else if (e?.status === 422) {
+        setCommentEditError(e?.message ?? tr.validationError);
+      } else {
+        setCommentEditError(e?.message ?? "Error");
+      }
+    } finally {
+      setCommentEditBusy(false);
+    }
+  }
+
+  function canEditComment(comment: CaseComment) {
+    if (!user || isResolved) return false;
+    return comment.author_uid === user.uid || isAdmin;
+  }
+
   const backToForumHref = `/forum${tab === "resolved" ? "?tab=resolved" : ""}`;
 
   // Gate (login requerido)
@@ -420,7 +462,7 @@ export default function ForumCaseDetail() {
                 </div>
               ) : null}
 
-              {user && !isResolved && (isCaseCreator || caseData.can_edit) ? (
+              {canEditCase ? (
                 <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
                   <button
                     onClick={() => setIsEditing((prev) => !prev)}
@@ -442,7 +484,7 @@ export default function ForumCaseDetail() {
                 </div>
               ) : null}
 
-              {!isResolved && isCaseCreator ? (
+              {canCloseCase ? (
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
                   <button
                     onClick={() => {
@@ -685,11 +727,89 @@ export default function ForumCaseDetail() {
                     >
                       <div style={{ display: "flex", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
                         <div style={{ fontWeight: 800 }}>{getAuthorName(c)}</div>
-                        <div style={{ color: "#6b7280", fontSize: 12 }}>
-                          {new Date(c.created_at).toLocaleString()}
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                          {canEditComment(c) ? (
+                            <button
+                              onClick={() => {
+                                setEditingCommentId(c.id);
+                                setEditingCommentBody(c.body);
+                                setCommentEditError(null);
+                              }}
+                              style={{
+                                border: "none",
+                                background: "transparent",
+                                color: "#0b2545",
+                                fontWeight: 800,
+                                cursor: "pointer",
+                                padding: 0,
+                              }}
+                            >
+                              {tr.editComment}
+                            </button>
+                          ) : null}
+                          <div style={{ color: "#6b7280", fontSize: 12 }}>
+                            {new Date(c.created_at).toLocaleString()}
+                          </div>
                         </div>
                       </div>
-                      <div style={{ marginTop: 6, whiteSpace: "pre-wrap" }}>{c.body}</div>
+                      {editingCommentId === c.id ? (
+                        <div style={{ marginTop: 8, display: "grid", gap: 8 }}>
+                          <textarea
+                            value={editingCommentBody}
+                            onChange={(e) => setEditingCommentBody(e.target.value)}
+                            rows={3}
+                            disabled={commentEditBusy}
+                            style={{
+                              width: "100%",
+                              padding: 10,
+                              borderRadius: 10,
+                              border: "1px solid #e5e7eb",
+                              resize: "vertical",
+                            }}
+                          />
+                          {commentEditError ? (
+                            <div style={{ color: "#b91c1c", fontWeight: 700 }}>{commentEditError}</div>
+                          ) : null}
+                          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                            <button
+                              onClick={() => {
+                                setEditingCommentId(null);
+                                setEditingCommentBody("");
+                                setCommentEditError(null);
+                              }}
+                              disabled={commentEditBusy}
+                              style={{
+                                padding: "8px 12px",
+                                borderRadius: 10,
+                                border: "1px solid #e5e7eb",
+                                background: "#fff",
+                                fontWeight: 800,
+                                cursor: commentEditBusy ? "not-allowed" : "pointer",
+                              }}
+                            >
+                              {tr.cancelEdit}
+                            </button>
+                            <button
+                              onClick={() => handleSaveCommentEdit(c.id)}
+                              disabled={commentEditBusy || !editingCommentBody.trim()}
+                              style={{
+                                padding: "8px 12px",
+                                borderRadius: 10,
+                                border: "none",
+                                background: "#0b2545",
+                                color: "#fff",
+                                fontWeight: 800,
+                                cursor: commentEditBusy ? "not-allowed" : "pointer",
+                                opacity: commentEditBusy ? 0.8 : 1,
+                              }}
+                            >
+                              {commentEditBusy ? tr.updatingComment : tr.saveChanges}
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div style={{ marginTop: 6, whiteSpace: "pre-wrap" }}>{c.body}</div>
+                      )}
                     </div>
                   ))
                 )}
