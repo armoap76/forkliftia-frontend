@@ -174,6 +174,22 @@ export async function postCaseComment(caseId: number, body: string) {
   return res.json() as Promise<CaseComment>;
 }
 
+export async function updateCaseComment(caseId: number, commentId: number, body: string) {
+  const res = await apiFetch(`/cases/${caseId}/comments/${commentId}`, {
+    method: "PATCH",
+    json: true,
+    body: JSON.stringify({ body }),
+  });
+
+  if (!res.ok) {
+    const err = new Error(await res.text());
+    (err as any).status = res.status;
+    throw err;
+  }
+
+  return res.json() as Promise<CaseComment>;
+}
+
 export async function updateCase(
   caseId: number,
   payload: Partial<
