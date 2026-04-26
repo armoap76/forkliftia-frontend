@@ -16,6 +16,7 @@ import {
 import { ForumHeader, type ForumTab } from "./ForumHeader";
 import { formatCaseTitle, getAuthorName, getCreatorName } from "./forumUtils";
 import { useAuthUser } from "./useAuthUser";
+import { PublicNameSetup } from "./PublicNameSetup";
 
 export default function ForumCaseDetail() {
   const navigate = useNavigate();
@@ -73,7 +74,7 @@ export default function ForumCaseDetail() {
 
   const tr = ui[lang];
   const user = auth.currentUser;
-  const { isAdmin } = useAuthUser();
+  const { isAdmin, publicName, setPublicName } = useAuthUser();
 
   const isResolved = caseData?.status === "resolved";
   const isCaseCreator = !!(user && caseData && caseData.created_by_uid === user.uid);
@@ -185,6 +186,10 @@ export default function ForumCaseDetail() {
     if (!caseData) return;
     const body = commentBody.trim();
     if (!body) return;
+    if (!publicName) {
+      setCommentsError("Antes de comentar, elegí tu nombre público.");
+      return;
+    }
     setCommentBusy(true);
     setCommentSuccess(null);
     setCommentsError(null);
@@ -211,6 +216,10 @@ export default function ForumCaseDetail() {
 
   async function handleSaveEdit() {
     if (!caseData) return;
+    if (!publicName) {
+      setEditError("Antes de comentar, elegí tu nombre público.");
+      return;
+    }
     setEditBusy(true);
     setEditError(null);
     try {
@@ -245,6 +254,10 @@ export default function ForumCaseDetail() {
 
   async function handleResolve() {
     if (!caseData) return;
+    if (!publicName) {
+      setResolveError("Antes de comentar, elegí tu nombre público.");
+      return;
+    }
 
     const note = resolutionNote.trim();
     if (!note) {
@@ -380,6 +393,10 @@ export default function ForumCaseDetail() {
     );
   }
 
+  if (publicName === null) {
+    return <PublicNameSetup onSaved={setPublicName} userDisplayName={user.displayName} />;
+  }
+
   return (
     <>
       <div style={{ maxWidth: 980, margin: "0 auto", padding: 18 }}>
@@ -466,13 +483,15 @@ export default function ForumCaseDetail() {
                 <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
                   <button
                     onClick={() => setIsEditing((prev) => !prev)}
+                    disabled={!publicName}
                     style={{
                       padding: "8px 12px",
                       borderRadius: 999,
                       border: "1px solid #e5e7eb",
                       background: "#fff",
                       fontWeight: 800,
-                      cursor: "pointer",
+                      cursor: publicName ? "pointer" : "not-allowed",
+                      opacity: publicName ? 1 : 0.6,
                     }}
                   >
                     {isEditing ? tr.cancelEdit : tr.editCase}
@@ -492,6 +511,7 @@ export default function ForumCaseDetail() {
                       setResolveError(null);
                       setShowResolveModal(true);
                     }}
+                    disabled={!publicName}
                     style={{
                       padding: "8px 12px",
                       borderRadius: 999,
@@ -499,7 +519,8 @@ export default function ForumCaseDetail() {
                       background: "#0b2545",
                       color: "#fff",
                       fontWeight: 800,
-                      cursor: "pointer",
+                      cursor: publicName ? "pointer" : "not-allowed",
+                      opacity: publicName ? 1 : 0.7,
                     }}
                   >
                     {tr.closeCase}
@@ -672,7 +693,7 @@ export default function ForumCaseDetail() {
                     onChange={(e) => setCommentBody(e.target.value)}
                     placeholder={tr.commentPlaceholder}
                     rows={3}
-                    disabled={commentBusy}
+                    disabled={commentBusy || !publicName}
                     style={{
                       width: "100%",
                       padding: 10,
@@ -684,7 +705,7 @@ export default function ForumCaseDetail() {
                   <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
                     <button
                       onClick={handleSubmitComment}
-                      disabled={commentBusy || !commentBody.trim()}
+                      disabled={commentBusy || !commentBody.trim() || !publicName}
                       style={{
                         padding: "10px 14px",
                         borderRadius: 10,
@@ -702,6 +723,11 @@ export default function ForumCaseDetail() {
                       <div style={{ color: "#059669", fontWeight: 700 }}>{commentSuccess}</div>
                     ) : null}
                   </div>
+                  {!publicName ? (
+                    <div style={{ color: "#b91c1c", fontWeight: 700 }}>
+                      Antes de comentar, elegí tu nombre público.
+                    </div>
+                  ) : null}
                 </div>
               ) : (
                 <div style={{ color: "#6b7280", fontSize: 13 }}>
