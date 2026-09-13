@@ -1,263 +1,89 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { signInWithPopup } from "firebase/auth";
-import { auth, googleProvider } from "./firebase";
-import { AppFooter } from "./Footer";
+import { Link } from "react-router-dom";
+import { PublicSite } from "./PublicSite";
+import { whatsappUrl } from "./contact";
+
+const services = [
+  "Diagnóstico de fallas eléctricas y electrónicas",
+  "Autoelevadores eléctricos",
+  "Apiladores",
+  "Zorras eléctricas",
+  "Reach trucks",
+  "Controladores electrónicos",
+  "Sensores, contactores, frenos y aceleradores",
+  "Comunicación CAN",
+  "Cableado y falsos contactos",
+  "Soporte tercerizado para talleres",
+];
 
 export default function Landing() {
-  const navigate = useNavigate();
-  const [busy, setBusy] = useState(false);
-
-  const handleGoToForum = () => {
-    navigate("/forum");
-  };
-
-  const handleStartDiagnosis = async () => {
-    if (busy) return;
-    setBusy(true);
-
-    try {
-      if (!auth.currentUser) {
-        await signInWithPopup(auth, googleProvider);
-      }
-      navigate("/diagnosis");
-    } catch (e: any) {
-      console.error("Login error:", e);
-      alert(e?.code || e?.message || "Error de inicio de sesión");
-    } finally {
-      setBusy(false);
-    }
-  };
-
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        backgroundColor: "#f9fafb",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        fontFamily:
-          'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-        padding: "32px 16px",
-        boxSizing: "border-box",
-      }}
-    >
-      <main
-        style={{
-          width: "100%",
-          maxWidth: 520,
-          backgroundColor: "#ffffff",
-          borderRadius: 20,
-          boxShadow: "0 12px 36px rgba(0,0,0,0.08)",
-          padding: "32px 28px",
-          boxSizing: "border-box",
-          textAlign: "center",
-        }}
-      >
-        <img
-          src="/logo.png"
-          alt="ForkliftIA"
-          style={{
-            width: 120,
-            height: 120,
-            margin: "0 auto 12px",
-            display: "block",
-            borderRadius: 16,
-          }}
-        />
+    <PublicSite>
+      <main id="contenido">
+        <section className="cima-hero" aria-labelledby="cima-title">
+          <div className="cima-container cima-hero-grid">
+            <div>
+              <p className="cima-eyebrow"><span className="cima-status-dot" /> Servicio técnico especializado</p>
+              <h1 id="cima-title">Diagnóstico electrónico, eléctrico y electromecánico para <span>autoelevadores eléctricos</span></h1>
+              <p className="cima-lead">Servicio técnico especializado en fallas de tracción, elevación, controladores, sensores, contactores, comunicación CAN, cableado y falsos contactos.</p>
+              <div className="cima-actions">
+                {whatsappUrl ? (
+                  <a className="cima-button cima-button-primary" href={whatsappUrl} target="_blank" rel="noopener noreferrer">
+                    Consultar por WhatsApp <span aria-hidden="true">↗</span>
+                  </a>
+                ) : (
+                  <button className="cima-button cima-button-primary" type="button" disabled>
+                    Consultar por WhatsApp
+                  </button>
+                )}
+                <Link className="cima-button cima-button-secondary" to="/forkliftia">
+                  Ingresar a ForkliftIA <span aria-hidden="true">→</span>
+                </Link>
+              </div>
+            </div>
+            <aside className="cima-specialties" aria-label="Especialidades de CIMA e³">
+              <p className="cima-eyebrow">Tres áreas. Un mismo enfoque.</p>
+              <div className="cima-specialty">
+                <span className="cima-specialty-number" aria-hidden="true">01</span>
+                <div><h2>Electrónica</h2><p>Controladores, sensores y comunicación CAN.</p></div>
+              </div>
+              <div className="cima-specialty">
+                <span className="cima-specialty-number" aria-hidden="true">02</span>
+                <div><h2>Eléctrica</h2><p>Cableado, contactores y falsos contactos.</p></div>
+              </div>
+              <div className="cima-specialty">
+                <span className="cima-specialty-number" aria-hidden="true">03</span>
+                <div><h2>Electromecánica</h2><p>Tracción, elevación, frenos y aceleradores.</p></div>
+              </div>
+              <div className="cima-specialties-foot">CIMA <span>e³</span></div>
+            </aside>
+          </div>
+        </section>
 
-        <h1
-          style={{
-            margin: 0,
-            fontSize: 34,
-            color: "#0b2545",
-            fontWeight: 800,
-          }}
-        >
-          ForkliftIA
-        </h1>
+        <section className="cima-services cima-container" id="servicios" aria-labelledby="services-title">
+          <div className="cima-section-heading">
+            <div><p className="cima-eyebrow">Nuestra especialidad</p><h2 id="services-title">Servicios</h2></div>
+            <p>Diagnóstico técnico para equipos eléctricos y soporte para talleres.</p>
+          </div>
+          <ul className="cima-service-list">
+            {services.map((service, index) => (
+              <li key={service}><span aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>{service}</li>
+            ))}
+          </ul>
+        </section>
 
-        <p
-          style={{
-            marginTop: 8,
-            marginBottom: 24,
-            color: "#111827",
-            fontSize: 16,
-            lineHeight: 1.5,
-          }}
-        >
-          ForkliftIA es una plataforma técnica para diagnóstico de
-          autoelevadores.
-          <br />
-          Combina casos reales, códigos de error y manuales técnicos
-          <br />
-          para ayudarte a diagnosticar fallas más rápido y con mejor
-          criterio.
-        </p>
-
-        <p
-          style={{
-            marginTop: -12,
-            marginBottom: 24,
-            color: "#4b5563",
-            fontSize: 14,
-            lineHeight: 1.5,
-          }}
-        >
-          Los casos que no se resuelven pasan automáticamente al foro
-          técnico,
-          <br />
-          donde otros profesionales pueden aportar su experiencia.
-          <br />
-          Cuantos más casos reales se documentan, más útil se vuelve la
-          herramienta.
-        </p>
-
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 12,
-            width: "100%",
-            marginTop: 8,
-          }}
-        >
-          <button
-            onClick={handleStartDiagnosis}
-            disabled={busy}
-            style={{
-              width: "100%",
-              padding: "12px 18px",
-              borderRadius: 999,
-              border: "none",
-              cursor: busy ? "not-allowed" : "pointer",
-              fontSize: 15,
-              fontWeight: 700,
-              backgroundColor: "#0b2545",
-              color: "#ffffff",
-              transition: "background-color 0.2s, transform 0.2s",
-              opacity: busy ? 0.8 : 1,
-            }}
-            onMouseEnter={(e) => {
-              if (busy) return;
-              e.currentTarget.style.backgroundColor = "#0d2e5a";
-              e.currentTarget.style.transform = "translateY(-1px)";
-            }}
-            onMouseLeave={(e) => {
-              if (busy) return;
-              e.currentTarget.style.backgroundColor = "#0b2545";
-              e.currentTarget.style.transform = "translateY(0)";
-            }}
-          >
-            {busy ? "Ingresando..." : "Iniciar diagnóstico"}
-          </button>
-
-          <button
-            onClick={handleGoToForum}
-            style={{
-              width: "100%",
-              padding: "11px 18px",
-              borderRadius: 999,
-              border: "1.5px solid #0b2545",
-              backgroundColor: "transparent",
-              color: "#0b2545",
-              cursor: "pointer",
-              fontSize: 14.5,
-              fontWeight: 700,
-              transition: "background-color 0.2s, color 0.2s, transform 0.2s",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = "#0b2545";
-              e.currentTarget.style.color = "#ffffff";
-              e.currentTarget.style.transform = "translateY(-1px)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "transparent";
-              e.currentTarget.style.color = "#0b2545";
-              e.currentTarget.style.transform = "translateY(0)";
-            }}
-          >
-            Ver foro
-          </button>
-        </div>
+        <section className="cima-container cima-project-section" aria-labelledby="project-title">
+          <div className="cima-project">
+            <div>
+              <p className="cima-eyebrow">Un proyecto de CIMA e³ <span className="cima-badge">En desarrollo</span></p>
+              <h2 id="project-title">Forklift<span>IA</span></h2>
+              <p>Proyecto técnico en desarrollo para documentar fallas reales, códigos de error y diagnósticos asistidos por IA.</p>
+            </div>
+            <Link className="cima-button cima-button-secondary" to="/forkliftia">
+              Ingresar a ForkliftIA <span aria-hidden="true">→</span>
+            </Link>
+          </div>
+        </section>
       </main>
-
-      <section
-        style={{
-          width: "100%",
-          maxWidth: 520,
-          marginTop: 16,
-          padding: "16px 18px",
-          backgroundColor: "#fff8e8",
-          border: "1px solid #f1dfb8",
-          borderRadius: 14,
-          boxSizing: "border-box",
-          color: "#3f3a2f",
-        }}
-      >
-        <h2
-          style={{
-            margin: 0,
-            fontSize: 17,
-            fontWeight: 700,
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            justifyContent: "center",
-          }}
-        >
-          <span aria-hidden="true">⚠️</span>
-          Aviso importante
-        </h2>
-        <p
-          style={{
-            marginTop: 10,
-            marginBottom: 0,
-            fontSize: 14,
-            lineHeight: 1.6,
-            fontStyle: "italic",
-          }}
-        >
-          ForkliftIA brinda orientación técnica basada en casos reales,
-          documentación técnica resumida y asistencia de IA.
-          <br />
-          La información publicada es orientativa, no garantiza una
-          reparación y no reemplaza el criterio profesional ni la
-          documentación oficial del fabricante.
-          <br />
-          Toda intervención debe ser realizada únicamente por personal
-          técnico capacitado y bajo condiciones seguras de trabajo.
-        </p>
-      </section>
-
-      <section
-        style={{
-          marginTop: 16,
-          marginBottom: 8,
-          textAlign: "center",
-          color: "#6b7280",
-          fontSize: 13,
-          lineHeight: 1.5,
-        }}
-      >
-        <div>Contacto y soporte técnico</div>
-        <a
-          href="mailto:forkliftia.soporte@gmail.com"
-          style={{
-            color: "#6b7280",
-            textDecoration: "underline",
-            fontWeight: 600,
-          }}
-        >
-          forkliftia.soporte@gmail.com
-        </a>
-      </section>
-
-      <div style={{ marginTop: 16, width: "100%" }}>
-        <AppFooter />
-      </div>
-    </div>
+    </PublicSite>
   );
 }

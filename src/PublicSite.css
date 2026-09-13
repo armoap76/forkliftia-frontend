@@ -1,0 +1,111 @@
+.cima-site {
+  --cima-ink: #102c39;
+  --cima-muted: #52656c;
+  --cima-accent: #b94b24;
+  min-height: 100%;
+  background: #fff;
+  color: var(--cima-ink);
+  line-height: 1.6;
+}
+.cima-site a { color: inherit; }
+.cima-site a, .cima-site button { -webkit-tap-highlight-color: transparent; }
+.cima-site a:focus-visible, .cima-site button:focus-visible {
+  outline: 3px solid var(--cima-accent);
+  outline-offset: 5px;
+}
+.cima-container { width: min(100% - 40px, 1120px); margin-inline: auto; }
+.cima-skip-link {
+  position: absolute; left: 20px; top: -100px; z-index: 10;
+  padding: 12px 20px; background: #fff; border: 2px solid var(--cima-accent);
+}
+.cima-skip-link:focus { top: 12px; }
+.cima-header { border-bottom: 1px solid #e6e9e7; }
+.cima-header-inner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding-block: 19px; }
+.cima-brand-link { text-decoration: none; }
+.cima-brand { white-space: nowrap; font-size: 29px; font-weight: 800; letter-spacing: -1.5px; line-height: 1; }
+.cima-brand > span { color: var(--cima-accent); font-weight: 600; }
+.cima-nav { display: flex; gap: 20px; align-items: center; font-size: 13px; font-weight: 650; }
+.cima-nav a { display: inline-flex; gap: 6px; align-items: center; min-height: 44px; text-decoration: none; }
+.cima-nav a:hover { color: var(--cima-accent); }
+.cima-hero { padding-block: 50px; background: #f7f8f4; border-bottom: 1px solid #e6e9e7; }
+.cima-hero-grid { display: grid; gap: 36px; }
+.cima-eyebrow { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; font-size: 11px; font-weight: 750; letter-spacing: 1.5px; text-transform: uppercase; }
+.cima-status-dot { flex: 0 0 7px; width: 7px; height: 7px; border-radius: 50%; background: var(--cima-accent); }
+.cima-hero h1 { margin-top: 20px; max-width: 760px; font-size: clamp(1.95rem, 4vw, 3.15rem); font-weight: 700; letter-spacing: -1.5px; line-height: 1.13; text-wrap: balance; }
+.cima-hero h1 > span { color: var(--cima-accent); }
+.cima-lead { max-width: 650px; margin-top: 24px; color: var(--cima-muted); font-size: 16px; line-height: 1.8; }
+.cima-actions { display: flex; flex-direction: column; gap: 12px; margin-top: 30px; }
+.cima-site .cima-button {
+  display: inline-flex; justify-content: center; align-items: center; gap: 16px;
+  min-height: 50px; padding: 13px 19px; border: 1px solid transparent; border-radius: 6px;
+  font: inherit; font-size: 14px; font-weight: 700; line-height: 1.4;
+  text-align: center; text-decoration: none; cursor: pointer;
+  transition: background-color 150ms, border-color 150ms;
+}
+.cima-site .cima-button-primary { background: var(--cima-ink); color: #fff; }
+.cima-site .cima-button-primary:hover:not(:disabled) { background: #204858; }
+.cima-site .cima-button-secondary { background: transparent; border-color: #a7b4b9; color: var(--cima-ink); }
+.cima-site .cima-button-secondary:hover { background: #eef1ef; border-color: var(--cima-ink); }
+.cima-site .cima-button:disabled { opacity: .65; cursor: not-allowed; }
+.cima-specialties { align-self: center; padding: 27px; border-radius: 10px; background: var(--cima-ink); color: #fff; }
+.cima-specialties > .cima-eyebrow { color: #bfccc9; font-size: 10px; letter-spacing: 1.2px; }
+.cima-specialty { display: flex; align-items: baseline; gap: 16px; padding-block: 22px; border-bottom: 1px solid #36505a; }
+.cima-specialty-number { color: #f4a684; font-size: 12px; font-variant-numeric: tabular-nums; }
+.cima-specialty h2 { font-size: 19px; font-weight: 600; letter-spacing: -.4px; }
+.cima-specialty p { margin-top: 6px; font-size: 13px; color: #c5d0d2; }
+.cima-specialties-foot { padding-top: 22px; font-size: 16px; letter-spacing: 3px; font-weight: 650; }
+.cima-specialties-foot span { color: #f4a684; }
+.cima-services { padding-block: 52px; scroll-margin-top: 24px; }
+.cima-section-heading { display: flex; flex-direction: column; gap: 16px; padding-bottom: 26px; }
+.cima-section-heading h2 { margin-top: 7px; font-size: 34px; font-weight: 650; letter-spacing: -1px; }
+.cima-section-heading > p { color: var(--cima-muted); max-width: 330px; font-size: 15px; }
+.cima-service-list { display: grid; list-style: none; border-top: 1px solid #dce2df; }
+.cima-service-list li { display: flex; gap: 17px; align-items: baseline; padding: 20px 4px; border-bottom: 1px solid #dce2df; font-size: 15px; font-weight: 550; }
+.cima-service-list li > span { color: var(--cima-accent); font-size: 11px; font-weight: 650; font-variant-numeric: tabular-nums; }
+.cima-project-section { padding-bottom: 54px; }
+.cima-project { display: flex; flex-direction: column; align-items: flex-start; gap: 27px; padding: 30px 24px; border: 1px solid #dfe6e6; border-radius: 10px; background: #f0f5f4; }
+.cima-badge { display: inline-block; padding: 4px 9px; border: 1px solid #c5d4d0; border-radius: 4px; color: #446359; font-size: 10px; letter-spacing: .6px; font-weight: 650; text-transform: uppercase; }
+.cima-project h2 { margin-block: 16px 12px; font-size: 36px; font-weight: 750; letter-spacing: -1.2px; }
+.cima-project h2 > span, .cima-access-card h1 > span { color: var(--cima-accent); }
+.cima-project > div > p:last-child { max-width: 570px; color: var(--cima-muted); font-size: 16px; }
+.cima-project .cima-button { width: 100%; flex-shrink: 0; }
+.cima-footer { border-top: 1px solid #e1e6e4; background: #fafbf8; }
+.cima-footer-inner { display: flex; flex-direction: column; gap: 24px; padding-block: 30px; }
+.cima-footer .cima-brand { font-size: 23px; letter-spacing: -1px; }
+.cima-footer p { margin-top: 10px; color: var(--cima-muted); font-size: 12px; }
+.cima-access { max-width: 760px; padding-block: 26px 40px; }
+.cima-back { display: inline-flex; align-items: center; min-height: 44px; margin-bottom: 15px; font-size: 13px; text-underline-offset: 4px; }
+.cima-access-card { padding: 30px 24px; border: 1px solid #dfe6e6; border-top: 4px solid var(--cima-accent); border-radius: 10px; background: #f7f8f4; }
+.cima-access-card > .cima-badge { margin-top: 12px; }
+.cima-access-card h1 { margin-top: 14px; font-size: clamp(2.8rem, 9vw, 3.8rem); letter-spacing: -2px; line-height: 1.2; }
+.cima-access-intro { margin-top: 18px; font-size: 18px; line-height: 1.7; }
+.cima-access-description { margin-top: 18px; color: var(--cima-muted); font-size: 14px; line-height: 1.8; }
+.cima-access-actions { display: grid; gap: 12px; margin-block: 28px; }
+.cima-notice { margin-top: 22px; padding: 22px 24px; border: 1px solid #e6ddc9; border-radius: 8px; background: #fbf8f1; }
+.cima-notice h2 { color: #66532c; font-size: 15px; font-weight: 700; }
+.cima-notice p { margin-top: 8px; color: #665c47; font-size: 13px; line-height: 1.8; }
+.cima-support { margin-top: 24px; color: var(--cima-muted); font-size: 13px; text-align: center; overflow-wrap: anywhere; }
+.cima-support a { display: inline-flex; align-items: center; min-height: 44px; text-underline-offset: 4px; }
+@media (min-width: 640px) {
+  .cima-container { width: min(100% - 64px, 1120px); }
+  .cima-header-inner { padding-block: 20px; }
+  .cima-nav { gap: 30px; font-size: 14px; }
+  .cima-hero { padding-block: 70px; }
+  .cima-actions { flex-direction: row; flex-wrap: wrap; }
+  .cima-section-heading { flex-direction: row; justify-content: space-between; align-items: flex-end; }
+  .cima-service-list { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 36px; }
+  .cima-services { padding-block: 70px; }
+  .cima-project { padding: 36px; }
+  .cima-project .cima-button { width: auto; }
+  .cima-footer-inner { flex-direction: row; justify-content: space-between; align-items: center; }
+  .cima-access { padding-top: 35px; }
+  .cima-access-card { padding: 36px 42px; }
+  .cima-access-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 1024px) {
+  .cima-hero-grid { grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr); align-items: center; gap: 58px; }
+  .cima-project { flex-direction: row; justify-content: space-between; align-items: center; gap: 36px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cima-site .cima-button { transition: none; }
+}

@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Landing from "./Landing";
+import ForkliftIA from "./ForkliftIA";
 import Diagnosis from "./Diagnosis";
 import Forum from "./Forum";
 import ForumCaseDetail from "./ForumCaseDetail";
@@ -10,6 +11,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Landing />} />
+        <Route path="/forkliftia" element={<ForkliftIA />} />
 
         <Route
           path="/diagnosis"
