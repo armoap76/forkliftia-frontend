@@ -3,16 +3,26 @@ import { PublicSite } from "./PublicSite";
 import { whatsappUrl } from "./contact";
 
 const services = [
-  "Diagnóstico de fallas eléctricas y electrónicas",
-  "Autoelevadores eléctricos",
-  "Apiladores",
-  "Zorras eléctricas",
-  "Reach trucks",
-  "Controladores electrónicos",
-  "Sensores, contactores, frenos y aceleradores",
-  "Comunicación CAN",
-  "Cableado y falsos contactos",
-  "Soporte tercerizado para talleres",
+  {
+    "title": "Diagnóstico electrónico",
+    "description": "Fallas en controladores, sensores, aceleradores, frenos eléctricos y sistemas de tracción."
+  },
+  {
+    "title": "Reparación eléctrica",
+    "description": "Revisión de cableados, falsos contactos, alimentación, contactores, fusibles y conexiones."
+  },
+  {
+    "title": "Mantenimiento preventivo",
+    "description": "Control general del sistema eléctrico/electrónico para reducir paradas inesperadas."
+  },
+  {
+    "title": "Placas, controladores y sensores",
+    "description": "Asistencia sobre módulos electrónicos, señales de entrada/salida y componentes críticos."
+  },
+  {
+    "title": "Soporte para talleres y flotas",
+    "description": "Servicio técnico tercerizado para diagnósticos complejos o refuerzo operativo."
+  }
 ];
 
 export default function Landing() {
@@ -60,15 +70,39 @@ export default function Landing() {
         </section>
 
         <section className="cima-services cima-container" id="servicios" aria-labelledby="services-title">
-          <div className="cima-section-heading">
-            <div><p className="cima-eyebrow">Nuestra especialidad</p><h2 id="services-title">Servicios</h2></div>
-            <p>Diagnóstico técnico para equipos eléctricos y soporte para talleres.</p>
+          <div className="cima-services-grid">
+            <div className="cima-services-content">
+              <div className="cima-section-heading">
+                <p className="cima-eyebrow">Servicios</p>
+                <h2 id="services-title">Soluciones técnicas para equipos en movimiento</h2>
+                <p className="cima-services-description">Diagnóstico, reparación y mantenimiento de sistemas electrónicos, eléctricos y electromecánicos en autoelevadores, apiladores y equipos de movimiento de materiales.</p>
+              </div>
+              <ul className="cima-service-list">
+                {services.map((service, index) => (
+                  <li key={service.title}>
+                    <span className="cima-service-number" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+                    <div>
+                      <h3>{service.title}</h3>
+                      <p>{service.description}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <figure className="cima-workshop">
+              <div className="cima-workshop-image">
+                <img
+                  src="/cima-technician-workshop.png"
+                  alt="Técnico de CIMA e³ revisando una placa electrónica con un multímetro en el taller."
+                  width="941"
+                  height="1672"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+              <figcaption>Servicio técnico especializado para talleres y flotas.</figcaption>
+            </figure>
           </div>
-          <ul className="cima-service-list">
-            {services.map((service, index) => (
-              <li key={service}><span aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>{service}</li>
-            ))}
-          </ul>
         </section>
 
         <section className="cima-container cima-project-section" aria-labelledby="project-title">
