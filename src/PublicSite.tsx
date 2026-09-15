@@ -1,5 +1,6 @@
 import { useEffect, type ReactNode } from "react";
 import { Link } from "react-router-dom";
+import cimaLogo from "./assets/cima-e3-logo.jpg";
 import "./PublicSite.css";
 
 export function CimaBrand() {
@@ -17,7 +18,7 @@ export function PublicSite({ children }: { children: ReactNode }) {
       <header className="cima-header">
         <div className="cima-container cima-header-inner">
           <Link className="cima-brand-link" to="/" aria-label="CIMA e³ — Inicio">
-            <CimaBrand />
+            <img className="cima-header-logo" src={cimaLogo} alt="CIMA E³" />
           </Link>
           <nav className="cima-nav" aria-label="Navegación principal">
             <a href="/#servicios">Servicios</a>
