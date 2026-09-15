@@ -21,7 +21,8 @@
 .cima-skip-link:focus { top: 12px; }
 .cima-header { border-bottom: 1px solid #e6e9e7; }
 .cima-header-inner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding-block: 19px; }
-.cima-brand-link { text-decoration: none; }
+.cima-brand-link { display: inline-flex; flex: 0 0 auto; align-items: center; text-decoration: none; }
+.cima-header-logo { display: block; width: 76px; height: auto; }
 .cima-brand { white-space: nowrap; font-size: 29px; font-weight: 800; letter-spacing: -1.5px; line-height: 1; }
 .cima-brand > span { color: var(--cima-accent); font-weight: 600; }
 .cima-nav { display: flex; gap: 20px; align-items: center; font-size: 13px; font-weight: 650; }
@@ -98,6 +99,7 @@
 @media (min-width: 640px) {
   .cima-container { width: min(100% - 64px, 1120px); }
   .cima-header-inner { padding-block: 20px; }
+  .cima-header-logo { width: 120px; }
   .cima-nav { gap: 30px; font-size: 14px; }
   .cima-hero { padding-block: 70px; }
   .cima-actions { flex-direction: row; flex-wrap: wrap; }
